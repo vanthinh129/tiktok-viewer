@@ -19,8 +19,6 @@ let config = {
 const userAgentDefault =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36';
 
-const data_tring = require("./tik_data.js")
-// console.log(data_tring)
 class TikTokSocket {
 
     constructor(data) {
