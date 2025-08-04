@@ -1,7 +1,7 @@
 const helper = require("./helper.js")
 const TiktokSocketAuto = require("./tiktok.socket.auto.tt2.new.js")
 // const GroupFetch = require("./GroupFetch.js")
-const Clone = require("./Clone.js")
+const Clone = require("./Clone3.js")
 const { head } = require("request")
 const data = {
 
@@ -129,7 +129,7 @@ class GroupView {
         try{
             
                 accounts.forEach(async (i, index )=>{
-                await helper.delay(index*6000)
+                // await helper.delay(index*6000)
                 let p = helper.getString(i+";", "proxy=",";")
                 if(p && proxy){
                     i = i.replace("proxy="+p,"")

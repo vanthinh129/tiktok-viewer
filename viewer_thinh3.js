@@ -25,7 +25,7 @@ const main = async () =>{
     // let acc_string = await helper.strData(path.resolve("./data_test/acc2_18k6_1k.txt"));
     // let proxies_str =await helper.strData(path.resolve("./data_test/proxy.txt"));
     // let acc_string = await helper.strData(path.resolve("./data_test/data_test_vps_account_thinh.txt"));
-    let acc_die_string = await helper.strData(path.resolve("./101.txt"));
+    let acc_die_string = '';//await helper.strData(path.resolve("./101.txt"));
     let acc_die_array = (acc_die_string.split(','))
     let acc_string = await helper.strData(path.resolve("./data_test/acc_socket.txt"));
     let proxies_str =await helper.strData(path.resolve("./data_test/acc_socket_proxy.txt"));

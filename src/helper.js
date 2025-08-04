@@ -6,7 +6,7 @@ const {execSync,exec, spawn} = require('child_process');
 const fetch = require('node-fetch');
 const HttpsProxyAgent = require('https-proxy-agent');
 const crypto = require('crypto');
-const {signreq} = require("./sign_request_site")
+// const {signreq} = require("./sign_request_site")
 const helper = {
   genuaMAC(){
     var ua = `Mozilla/5.0 (Macintosh; Intel Mac OS X ${helper.getRandomInt (10, 17)}_${helper.getRandomInt (0, 3)}_${helper.getRandomInt (0, 3)}) AppleWebKit/${helper.getRandomInt (500, 600)}.1.${helper.getRandomInt (1, 15)} (KHTML, like Gecko) Version/${helper.getRandomInt (15, 17)}.${helper.getRandomInt (0, 3)} Safari/${helper.getRandomInt (500, 600)}.1.${helper.getRandomInt (1, 15)}`

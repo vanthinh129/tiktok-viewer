@@ -12,7 +12,7 @@ const crypto = require("crypto");
 const util = require("util");
 
 let DEFAULT_USERAGENT =
-"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36";
+"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36";
 let PASSWORD = "webapp1.0+202106";
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))

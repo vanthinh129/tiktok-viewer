@@ -7,7 +7,7 @@ clearCacheForFile(config_file)
 
 // const BrowserService = require("./BrowserService");
 const querystring = require('querystring');
-const Signer = require("./signer");
+const Signer = require("./signer.js");
 const os = require("os");
 const { verify } = require("crypto");
 let os_type = os.type();
@@ -75,6 +75,14 @@ class Clone {
         await delay(170*1000)
     }
   }
+  async sign(options) {
+    let { url , bodyEncoded, bodyJson, msToken} = options
+    let signer = await Signer.getInstance()
+    let { url: targetUrl, xbogus, _signature} = await signer.buildUrlPageFull({url, bodyEncoded, bodyJson, msToken})
+    // console.log("targetUrl", targetUrl)
+    return { targetUrl, xbogus, _signature }
+    
+}
   async runFetchs(){
     // let r_leave = await this.callApi({type: "leave"})
     // await delay(1000)
@@ -127,7 +135,7 @@ class Clone {
             case "enter":
                  url = `https://webcast.tiktok.com/webcast/room/enter/?aid=1988&app_language=vi&app_name=tiktok_web&browser_language=vi-VN&browser_name=Mozilla&browser_online=true&browser_platform=MacIntel&browser_version=${encodeURIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=web_h264&focus_state=true&from_page=user&history_len=4&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=&referer=&region=VN&screen_height=900&screen_width=1440&tz_name=Asia%2FSaigon&webcast_language=vi-VN`
 
-                 url = `https://webcast.tiktok.com/webcast/room/enter/?aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi&browser_name=Mozilla&browser_online=true&browser_platform=${browser_platform}&browser_version=${encodeURIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=${device_type}&focus_state=true&from_page=&history_len=4&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=VN&referer=&region=VN&root_referer=&screen_height=982&screen_width=1512&tz_name=Asia%2FSaigon&user_is_login=true&verifyFp=${verifyFp}&webcast_language=vi-VN&msToken=${msToken}`
+                 url = `https://webcast.tiktok.com/webcast/room/enter/?aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi&browser_name=Mozilla&browser_online=true&browser_platform=${browser_platform}&browser_version=${encodeURIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=${device_type}&focus_state=true&from_page=&history_len=4&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=VN&referer=&region=VN&root_referer=&screen_height=982&screen_width=1512&tz_name=Asia%2FSaigon&user_is_login=true&verifyFp=${verifyFp}&webcast_language=vi-VN`
                 //  url = `https://webcast.tiktok.com/webcast/room/enter/?aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi&browser_name=Mozilla&browser_online=true&browser_platform=MacIntel&browser_version=${this.encodeRFC3986URIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=${device_type}&focus_state=true&from_page=&history_len=0&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=&referer=&region=VN&screen_height=${screen_height}&screen_width=${screen_width}&tz_name=Asia%2FBangkok&user_is_login=true&verifyFp=${verifyFp}&webcast_language=vi-VN`
                 _bodyJson = {enter_source: "others-others", room_id: room_id}
                 break;
@@ -143,13 +151,22 @@ class Clone {
 
       }
            let target_url = ""
-           let bodyEncoded = JSON.stringify(_bodyJson);
+          //  let bodyEncoded = JSON.stringify(_bodyJson);//querystring.stringify(_bodyJson);
       
           //  let  { url: targetUrl, xbogus, _signature, bodyEncoded} = await br.buildUrlPageFull({url,  bodyJson: _bodyJson, msToken})
-          let  { url: targetUrl, xbogus, _signature} = await signer.buildUrlPageFull({url,  bodyJson: _bodyJson,bodyEncoded:bodyEncoded, msToken})
+          // let  { url: targetUrl, xbogus, _signature} = await signer.buildUrlPageFull({url,  bodyJson: _bodyJson,bodyEncoded:bodyEncoded, msToken})
+          let bodyEncoded = querystring.stringify(_bodyJson);
+            let {targetUrl} = await this.sign({url, bodyEncoded: bodyEncoded, msToken});
             
             target_url = targetUrl
-            console.log("target_url",target_url)
+            console.log("target_url",target_url,"bodyEncoded",bodyEncoded)
+            let s_sdk_crypt_sdk = getString(cookie_string, 'crypt_sdk_b64=', ';');
+            let s_sdk_sign_data_key = getString(cookie_string, 'sign_data_key_b64=', ';');
+            let data_gen = helper.genheaderenter({
+                s_sdk_crypt_sdk,
+                s_sdk_sign_data_key,
+                path: '/webcast/room/enter/'
+            })
             // process.exit(1)
         var options = {
         proxy:  parserProxyString(this.proxy),
@@ -170,11 +187,18 @@ class Clone {
             'sec-ch-ua': '"Google Chrome";v="134", "Chromium";v="134", "Not?A_Brand";v="24"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"macOS"',
-            'x-secsdk-csrf-token': 'DOWNGRADE'
+            'x-secsdk-csrf-token': 'DOWNGRADE',
         },
         body: bodyEncoded,
         isRetry: false
         };
+        if(data_gen && data_gen["tt-ticket-guard-client-data"] && data_gen["tt-ticket-guard-public-key"]){
+          options.headers["tt-ticket-guard-client-data"] = data_gen["tt-ticket-guard-client-data"]
+          options.headers["tt-ticket-guard-iteration-version"] = 0
+          options.headers["tt-ticket-guard-public-key"] = data_gen["tt-ticket-guard-public-key"]
+          options.headers["tt-ticket-guard-version"] = 2
+          options.headers["tt-ticket-guard-web-version"] = 1
+        }
      
         let data_page = await helper.makeRequest(options);
         // process.exit(1)
@@ -247,21 +271,25 @@ fetch() {
             let endpoint = ``
             // endpoint = `version_code=180800&aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi-VN&browser_name=Mozilla&browser_online=true&browser_platform=MacIntel&browser_version=${appVersion}&cookie_enabled=true&cursor=${cursor}&debug=false&device_id=&device_platform=web&did_rule=3&sup_ws_ds_opt=1&fetch_rule=${fetch_rule}&history_comment_count=0&history_comment_cursor=${history_comment_cursor}&host=https%3A%2F%2Fwebcast.tiktok.com&identity=audience&internal_ext=${encodeURIComponent(internal_ext)}&last_rtt=${last_rtt}&live_id=12&resp_content_type=protobuf&room_id=${this.room_id}&screen_height=900&screen_width=1440&tz_name=Asia%2FSaigon&version_code=270000&msToken=${msToken}`
 
-            endpoint = `version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&msToken=${msToken}&browser_platform=MacIntel&browser_name=Mozilla&browser_version=${appVersion}&browser_online=true&tz_name=Asia/Saigon&aid=1988&app_name=tiktok_web&live_id=12&version_code=270000&debug=false&app_language=vi-VN&client_enter=1&room_id=${this.room_id}&identity=audience&history_comment_count=6&fetch_rule=1&last_rtt=${this.last_rtt }&internal_ext=${(internal_ext).replaceAll("|","%7C")}&cursor=${cursor}&history_comment_cursor=${history_comment_cursor}&sup_ws_ds_opt=1&resp_content_type=protobuf&did_rule=3`
+            endpoint = `version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&browser_platform=MacIntel&browser_name=Mozilla&browser_version=${appVersion}&browser_online=true&tz_name=Asia/Saigon&aid=1988&app_name=tiktok_web&live_id=12&version_code=270000&debug=false&app_language=vi-VN&client_enter=1&room_id=${this.room_id}&identity=audience&history_comment_count=6&fetch_rule=1&last_rtt=${this.last_rtt }&internal_ext=${(internal_ext).replaceAll("|","%7C")}&cursor=${cursor}&history_comment_cursor=${history_comment_cursor}&sup_ws_ds_opt=1&resp_content_type=protobuf&did_rule=3`
             let url = "";
             if(!internal_ext) {
 
 
 
                
-                endpoint = `version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&msToken=${msToken}&browser_platform=MacIntel&browser_name=Mozilla&browser_version=${appVersion}&browser_online=true&tz_name=Asia/Saigon&aid=1988&app_name=tiktok_web&live_id=12&version_code=270000&debug=false&app_language=vi-VN&client_enter=1&room_id=${this.room_id}&identity=audience&history_comment_count=6&fetch_rule=1&last_rtt=-1&internal_ext=0&cursor=0&history_comment_cursor=0&sup_ws_ds_opt=1&resp_content_type=protobuf&did_rule=3`
+                endpoint = `version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&browser_platform=MacIntel&browser_name=Mozilla&browser_version=${appVersion}&browser_online=true&tz_name=Asia/Saigon&aid=1988&app_name=tiktok_web&live_id=12&version_code=270000&debug=false&app_language=vi-VN&client_enter=1&room_id=${this.room_id}&identity=audience&history_comment_count=6&fetch_rule=1&last_rtt=-1&internal_ext=0&cursor=0&history_comment_cursor=0&sup_ws_ds_opt=1&resp_content_type=protobuf&did_rule=3`
             }
 
 
  
             let route = 'https://webcast.tiktok.com/webcast/im/fetch/'
             // let  { url: targetUrl, xbogus, _signature} = await br.buildUrlPageFull({url: `${route}?${endpoint}`, msToken})
-            let  { url: targetUrl, xbogus, _signature} = await signer.buildUrlPageFull({url: `${route}?${endpoint}`, msToken})
+            // let  { url: targetUrl, xbogus, _signature} = await signer.buildUrlPageFull({url: `${route}?${endpoint}`, msToken})
+            let { targetUrl} = await this.sign({
+              url: `${route}?${endpoint}`,
+              msToken,
+          });
 
                url = targetUrl
 
