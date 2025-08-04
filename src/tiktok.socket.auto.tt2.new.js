@@ -162,10 +162,10 @@ class TikTokSocket {
         
         let result =  await new Promise(async(r) => {
             console.log("start socket")
-            that.proxy_string = "KAOjQTal:3Vo2GjD2@92.112.111.246:30212";
+            // that.proxy_string = "KAOjQTal:3Vo2GjD2@92.112.111.246:30212";
             // that.proxy_string = "5Yvg7Ebz:DUvvwcSw@193.160.216.151:62446"
             // that.proxy_string = "SbNFop:iMAWfP@180.149.35.225:32305"// tạch
-            that.proxy_string = "amac129:amac129@1.53.95.152:35879"
+            // that.proxy_string = "amac129:amac129@1.53.95.152:35879"
             try {
                 let tunnelingAgent
                 let options = {
