@@ -143,7 +143,7 @@ class Clone {
 
       }
            let target_url = ""
-           let bodyEncoded = querystring.stringify(_bodyJson);
+           let bodyEncoded = JSON.stringify(_bodyJson);
       
           //  let  { url: targetUrl, xbogus, _signature, bodyEncoded} = await br.buildUrlPageFull({url,  bodyJson: _bodyJson, msToken})
           let  { url: targetUrl, xbogus, _signature} = await signer.buildUrlPageFull({url,  bodyJson: _bodyJson,bodyEncoded:bodyEncoded, msToken})
