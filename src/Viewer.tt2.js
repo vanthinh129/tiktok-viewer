@@ -1,5 +1,5 @@
 const helper = require("./helper.js")
-const TiktokSocketAuto = require("./tiktok.socket.auto.tt2.new.js")
+const TiktokSocketAuto = require("./socket.js")
 // const GroupFetch = require("./GroupFetch.js")
 const Clone = require("./Clone3.js")
 const { head } = require("request")

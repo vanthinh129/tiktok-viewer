@@ -164,12 +164,16 @@ class Clone {
             target_url = targetUrl
             // console.log("target_url",target_url,"bodyEncoded",bodyEncoded)
             let s_sdk_crypt_sdk = getString(cookie_string, 'crypt_sdk_b64=', ';');
+       
             let s_sdk_sign_data_key = getString(cookie_string, 'sign_data_key_b64=', ';');
-            let data_gen = helper.genheaderenter({
+            let data_gen 
+            if(s_sdk_crypt_sdk){
+              data_gen = helper.genheaderenter({
                 s_sdk_crypt_sdk,
                 s_sdk_sign_data_key,
                 path: '/webcast/room/enter/'
             })
+            }
             // process.exit(1)
         var options = {
         proxy:  parserProxyString(this.proxy),
@@ -355,6 +359,7 @@ fetch() {
                   let {idHexServer , part}= getIdHexServer(hex)
                   if(!this.idHexServer){
                     this.idHexServer = idHexServer
+                    console.log("idHexServer",idHexServer)
                     this.part = part
                   }
                 
