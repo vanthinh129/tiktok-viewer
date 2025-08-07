@@ -33,7 +33,7 @@ async function main(){
             let total_user = data.total_user
             username_join_on_list = username_join_on_list.sort()
             console.log(helper.getTime(),room_ids[i],':',total_user,data?.data_user?.length,count_join,(data_room[room_ids[i]])?true:false
-            // ,username_join_on_list.join(",")
+            ,username_join_on_list.join(",")
         )
             // console.log(helper.getTime(),room_id,':',username_join_on_list.join(","),count_join)
             // await helper.delay(1000)

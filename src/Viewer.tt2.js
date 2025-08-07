@@ -1,5 +1,7 @@
 const helper = require("./helper.js")
 const TiktokSocketAuto = require("./socket.js")
+// const TiktokSocketAuto = require("./tiktok.socket.auto.tt2.new.js")
+// const TiktokSocketAuto = require("./tiktok.socket.js")
 // const GroupFetch = require("./GroupFetch.js")
 const Clone = require("./Clone3.js")
 const { head } = require("request")
@@ -146,7 +148,9 @@ class GroupView {
                 let socket = new TiktokSocketAuto(config_data)
                 // console.log("Start socket", index, (new Date().toLocaleString()))
                 socket.connect({ room_id})
-
+                setTimeout(function(){
+                    // socket.switchRoom({room_id:"7535866341132815122"})
+                }, 90000)
                 if(!data[task_id]){
                     data[task_id] = {}
                 }

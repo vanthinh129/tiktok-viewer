@@ -28,6 +28,7 @@ class TikTokSocket {
         this.cookie_string = cookie_string || "";
         this.onMessage = onMessage;
         this.clone = clone
+        this.room_id = clone.room_id
         this.wrss = wrss;
         this.isShowLog= isShowLog;
         this.task_id= task_id || "";
@@ -48,6 +49,7 @@ class TikTokSocket {
         this.retryTimeFull = 5;
         this.retryTimeMaxFull = 10000;
         this.socketConnected = false;
+        this.connection = null;
         this.closed = false;
         this.is_101 = false;
         this.reconnect_after_time = reconnect_after_time || this.getRandomInt(8*60, 10*60)*1000
@@ -83,14 +85,14 @@ class TikTokSocket {
         });
         return Buffer.from(webcastPushFrame.finish())
     }
-      switchRooms(roomId) {
+    messageSwitchRooms(roomId) {
         const imEnterRoomMessage = WebcastImEnterRoomMessage.encode({
             roomId: roomId,
             roomTag: '',
             liveRegion: '',
             liveId: '12',
             identity: 'audience',
-            cursor: '',
+            cursor: '',//this.clone.cursor || '',
             accountType: '0',
             enterUniqueId: '',
             filterWelcomeMsg: '0',
@@ -116,8 +118,46 @@ class TikTokSocket {
         });
         return Buffer.from(webcastPushFrame.finish())
     }
+    async switchRoom({room_id}){
+        let that = this
+        console.log(`Switching to room: ${room_id}`);
+        
+        // Update clone with new room_id
+        that.clone.room_id = room_id
+        that.room_id = room_id
+        
+        try {
+            // Call API to enter new room
+            await that.clone.callApi({type: "enter"});
+            
+            // Fetch new room data
+            // that.clone.setCursor = true;
+            // let res = await that.clone.fetch();
+            // that.lastFetch = Date.now();
+            // that.wrss = that.clone.wrss;
+            // that.internal_ext = that.clone.internal_ext;
+            // that.cursor = that.clone.cursor;
+            
+            // Send switch room message via websocket if connected
+            if(that.socketConnected && that.connection) {
+                let hb_first = that.sendHeartbeat(that.room_id)
+                    // console.log("hb_first", hb_first.toString("base64"))
+                    that.connection.sendBytes(hb_first);
+                    await helper.delay(1000)
+                    that.connection.sendBytes(that.messageSwitchRooms(that.room_id));
+                    console.log(`Switch room message sent for room: ${room_id}`);
+                    console.log(`Switch room message (base64): ${that.messageSwitchRooms(that.room_id).toString('base64')}`);
+            }
+            
+            return true;
+        } catch(e) {
+            console.log("switchRoom error", e);
+            return false;
+        }
+    }
     async connect({ room_id }) {
         let that = this
+        that.room_id = room_id
         if(this.closed){
             return false
         }
@@ -188,6 +228,10 @@ class TikTokSocket {
             // that.proxy_string = "5Yvg7Ebz:DUvvwcSw@193.160.216.151:62446"
             // that.proxy_string = "SbNFop:iMAWfP@180.149.35.225:32305"// tạch
             // that.proxy_string = "amac129:amac129@1.53.95.152:35879"
+            if(that.cookie_string.includes("proxy_socket")){
+                that.proxy_string = helper.getString(that.cookie_string+";", "proxy_socket=",";")
+            }else{
+            }
             try {
                 let tunnelingAgent
                 let options = {
@@ -272,7 +316,7 @@ class TikTokSocket {
                         let mes = await that.deserializeWebsocketMessage(message.binaryData)
 
                         if(mes?.id&& mes?.webcastResponse?.internalExt && mes?.webcastResponse?.needAck){
-                            connection.sendBytes(that.sendAck({ logId: mes.id, protoMessageFetchResult: { internalExt: mes?.webcastResponse.internalExt } }));
+                            // connection.sendBytes(that.sendAck({ logId: mes.id, protoMessageFetchResult: { internalExt: mes?.webcastResponse.internalExt } }));
                         }
                         // // if(mes?.webcastResponse?.internalExt&& mes.webcastResponse.internalExt !=="-"){
 
@@ -331,8 +375,8 @@ class TikTokSocket {
                     let seq =1 
 
                     const createImEnterHexMessage = () => {
-                        let m =  that.switchRooms(room_id)
-                        console.log(m)
+                        let m =  that.messageSwitchRooms(that.room_id)
+                        console.log(m.toString("base64"))
                         return  m
                         return Buffer.from("320270623a0d696d5f656e7465725f726f6f6d421b0892968bf0f6d3a1ca68200c2a0861756469656e636540004a0130","hex")
                         // Phần header cố định
@@ -413,13 +457,20 @@ class TikTokSocket {
                         // console.log("ClientHB", hex,idHex.toString  ("utf8"))
                         return idHex
                     }
-
-                    connection.sendBytes(that.sendHeartbeat(room_id));
+                    async function _sendPing2() {
+                        let randomNum = 10000;
+                        await helper.delay(randomNum)
+                        if (that.socketConnected) {
+                            connection.sendBytes(that.sendHeartbeat(that.room_id));
+                        }
+                        if (that.alive) _sendPing2()
+                    }
+                    let hb_first = that.sendHeartbeat(that.room_id)
+                    // console.log("hb_first", hb_first.toString("base64"))
+                    connection.sendBytes(hb_first);
+                    await helper.delay(1000)
                     connection.sendBytes(createImEnterHexMessage());
-                    that.inter = setInterval(() => {
-                        connection.sendBytes(that.sendHeartbeat(room_id));
-
-                    },10000)
+                    _sendPing2()
                         
                     
           

@@ -303,7 +303,9 @@ class TikTokSocket {
                         let messageHex =  header + random8Bytes + midfix + idHex + suffix;
                     
                         let message =Buffer.from(messageHex,"hex")
-                        // console.log("createImEnterHexMessage", message.toString(),message.toString('hex') )
+                        console.log("createImEnterHexMessage", 
+                            // message.toString(),message.toString('hex'), 
+                        message.toString("utf8") )
                         return message
                       };
                     // connection.sendBytes(Buffer.from(createHexMessage(that.clone.cursor),"hex"));
@@ -370,8 +372,9 @@ class TikTokSocket {
                         // console.log("ClientHB", hex,idHex.toString  ("utf8"))
                         return idHex
                     }
-
-                    connection.sendBytes(createMessageClientHBFirst());
+                    let first_mess = createMessageClientHBFirst()
+                    console.log("first_mess",first_mess.toString("utf8"))
+                    connection.sendBytes(first_mess);
                     connection.sendBytes(createImEnterHexMessage());
                     _sendPing2()
                     // that.inter = setInterval(() => {
