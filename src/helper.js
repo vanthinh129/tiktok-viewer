@@ -6,6 +6,7 @@ const {execSync,exec, spawn} = require('child_process');
 const fetch = require('node-fetch');
 const HttpsProxyAgent = require('https-proxy-agent');
 const crypto = require('crypto');
+const axios = require('axios');
 // const {signreq} = require("./sign_request_site")
 const helper = {
   genuaMAC(){
@@ -669,7 +670,7 @@ const helper = {
     })
   },
   getRoomId3: async function ({name, proxy, retryCount, cookie_string }) {
-    console.log(proxy)
+    // console.log(proxy)
     // proxy = helper.getProxyX();
     if(!name) {
       return ""
@@ -678,7 +679,7 @@ const helper = {
     //   name = `https://www.tiktok.com/@${name}/live`
     // };
     let url = `https://www.tiktok.com/api-live/user/room/?aid=1988&app_language=en-US&app_name=tiktok_web&browser_language=en&browser_name=Mozilla&browser_online=true&browser_platform=Win32&browser_version=5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F106.0.0.0+Safari%2F537.36&cookie_enabled=true&cursor=&internal_ext=&device_platform=web&focus_state=true&from_page=user&history_len=0&is_fullscreen=false&is_page_visible=true&did_rule=3&fetch_rule=1&last_rtt=0&live_id=12&resp_content_type=protobuf&screen_height=1152&screen_width=2048&tz_name=Europe%2FBerlin&referer=https%3A%2F%2Fwww.tiktok.com%2F&root_referer=https%3A%2F%2Fwww.tiktok.com%2F&host=https%3A%2F%2Fwebcast.tiktok.com&webcast_sdk_version=1.3.0&update_version_code=1.3.0&uniqueId=${name}&sourceType=54`
-    console.log('name',name)
+    // console.log('name',name)
     let retry = retryCount || 0;
     let headers = {
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
@@ -1207,6 +1208,16 @@ encodeRFC3986URIComponent: function(str) {
     (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
   );
 },
+
+getLocationProxy: async function (proxy) {
+  let url = 'https://ipinfo.io/json'
+  let res = await helper.makeRequest({url, proxy})
+  if(res.bodyJson && res.bodyJson.org) {
+    return res.bodyJson.org
+  }else{
+    return "null"
+  }
+},
 getProxySite: async function (proxy) {
   let url = 'http://217.15.163.20:8549/api/cron/getliveproxies?authensone=mysonetrend&time=120'
   let res = await helper.makeRequest({url})
@@ -1216,6 +1227,40 @@ getProxySite: async function (proxy) {
   }else{
     console.log("Error getting proxy site", res.body, res.bodyJson)
     return []
+  }
+},
+generateFakeTtwid: function() {
+  const version = 1;
+  const payload = crypto.randomBytes(32).toString("base64url"); // ~43 ký tự
+  const expires = Math.floor(Date.now() / 1000) + 3600 * 24 * 30; // 30 ngày
+  const signature = crypto.randomBytes(32).toString("hex"); // random, không hợp lệ
+
+  return `${version}%7C${payload}%7C${expires}%7C${signature}`;
+},
+getWid: async function(COOKIE_TTWID) {
+  try {
+    const response = await axios.get("https://www.tiktok.com/", {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+        "Cookie": `ttwid=${COOKIE_TTWID};`
+      }
+    });
+
+    const html = response.data;
+
+    // Tìm wid trong mã nguồn HTML (window.__INIT_PROPS__ hoặc window.__DEFAULT_SCOPE__)
+    const match = html.match(/"wid":"(\d+)"/);
+    if (match) {
+      console.log("✅ wid:", match[1]);
+      return match[1]
+    } else {
+      console.log("❌ Không tìm thấy wid trong response");
+      return false
+    }
+
+  } catch (error) {
+    console.error("Lỗi:", error.response?.status, error.message);
+    return false
   }
 },
 getUserInfo :async function ({ proxy, cookie_string="", retryCount, username=null}){

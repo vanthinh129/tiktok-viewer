@@ -2,10 +2,7 @@
 const path = require("path")
 const { delay, getString, parserProxyString, sendMessageTele, sendMessageTele403,log_403, logs_die, changeIp, changeProxyIp, clearCacheForFile, getRandomInt } = require("./helper")
 const helper = require('./helper')
-let config_file = path.resolve('./data/config.v5.json');
-clearCacheForFile(config_file)
-
-// const BrowserService = require("./BrowserService");
+const BrowserService = require("./BrowserService");
 const querystring = require('querystring');
 const Signer = require("./signer.js");
 const os = require("os");
@@ -54,6 +51,7 @@ class Clone {
     this.proxy_list =proxy_list
     this.failTime = 0;
     this.status = "running"
+    this.is_cookie_live = true;
     this.browser_platform =browser_platform
     let random_de = getRandomInt(187248723442,934782374123)  
     // this.device_id=  "7284943"+random_de;
@@ -77,7 +75,11 @@ class Clone {
   }
   async sign(options) {
     let { url , bodyEncoded, bodyJson, msToken} = options
-    let signer = await Signer.getInstance()
+    if(msToken){
+      url = `${url}&msToken=${msToken}`
+    }
+    const is_sign_browser = true
+    let signer = is_sign_browser ? await BrowserService.getInstance(userAgentDefault, {initSign: true, headless: "yes"}) : await Signer.getInstance(userAgentDefault)
     let { url: targetUrl, xbogus, _signature} = await signer.buildUrlPageFull({url, bodyEncoded, bodyJson, msToken})
     // console.log("targetUrl", targetUrl)
     return { targetUrl, xbogus, _signature }
@@ -110,8 +112,9 @@ class Clone {
     this.username = getString(cookie_string + ';', 'username=', ';') || this.session_id;
     let verifyFp = getString(cookie_string.replace(/ /g,'') + ';', 'verifyFp=', ';') || getString(cookie_string.replace(/ /g,'') + ';', 's_v_web_id=', ';')
     this.device_id = getString(cookie_string + ';', 'device_id=', ';') || getString(cookie_string + ';', ';wid=', ';') || this.device_id
+    // this.device_id = "7534355"+getRandomInt(187248723442,934782374123)//7534355227077674503
     let device_id = this.device_id
-    console.log("device_id",device_id)
+    // console.log("device_id",device_id)
     // process.exit(1)
     try {
         if (session_id == "") {
@@ -121,7 +124,6 @@ class Clone {
         let url = "";
 
         // let br = await BrowserService.getInstance(userAgentDefault, {initSign: true, headless: "yes"})
-        const signer = await Signer.getInstance(userAgentDefault) 
         let device_type = "web_h265"
         let screen_height = 982
         let screen_width = 1512
@@ -130,6 +132,7 @@ class Clone {
         switch (type) {
             case "leave":
                 url = `https://webcast.tiktok.com/webcast/room/leave/?aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi-VN&browser_name=Mozilla&browser_online=true&browser_platform=MacIntel&browser_version=${encodeURIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=web_h264&focus_state=true&from_page=user&history_len=4&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=&referer=&region=VN&screen_height=900&screen_width=1440&tz_name=Asia%2FSaigon&webcast_language=vi-VN&msToken=${msToken}`
+                url = `https://webcast.tiktok.com/webcast/room/leave/?aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi&browser_name=Mozilla&browser_online=true&browser_platform=${browser_platform}&browser_version=${encodeURIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=${device_type}&focus_state=true&from_page=&history_len=4&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=VN&referer=&region=VN&root_referer=&screen_height=982&screen_width=1512&tz_name=Asia%2FSaigon&user_is_login=true&verifyFp=${verifyFp}&webcast_language=vi-VN`
                 _bodyJson = {reason: 0, room_id: room_id}
               break;
             case "enter":
@@ -159,7 +162,7 @@ class Clone {
             let {targetUrl} = await this.sign({url, bodyEncoded: bodyEncoded, msToken});
             
             target_url = targetUrl
-            console.log("target_url",target_url,"bodyEncoded",bodyEncoded)
+            // console.log("target_url",target_url,"bodyEncoded",bodyEncoded)
             let s_sdk_crypt_sdk = getString(cookie_string, 'crypt_sdk_b64=', ';');
             let s_sdk_sign_data_key = getString(cookie_string, 'sign_data_key_b64=', ';');
             let data_gen = helper.genheaderenter({
@@ -258,7 +261,6 @@ fetch() {
             // },timeout)
            
             // let br = await BrowserService.getInstance(userAgentDefault, {initSign: true, headless: "yes"})
-            const signer = await Signer.getInstance(userAgentDefault) 
             let appVersion = encodeURI(appVersionDefault)
 
             isFetch = true
@@ -293,7 +295,7 @@ fetch() {
 
                url = targetUrl
 
-              console.log("url",url)
+              // console.log("url",url)
                var options = {
                 proxy_list: this.proxy_list,
                 proxy:  parserProxyString(this.proxy),
@@ -536,6 +538,7 @@ fetch() {
       this.is_cookie_live = true
       return {status:true, live:true,body}
     }else{
+      this.is_cookie_live = false
       return {status:true, live:false, body}
     }
   }

@@ -12,49 +12,54 @@ let wrss_obejct = {
 let clones_obejct = {
 
 }
-let interval = setInterval(async ()=>{
-    let total = 0;
-    let non_101 = 0;
-    let fetch_403 = 0
-    let connected = 0 
-    let list_403 = []
-    for(let i in data){
-        let total = 0;
-        let non_101 = 0;
-        let fetch_403 = 0
-        let connected = 0 
-        let sockets = data[i].sockets
-        sockets.forEach(item=>{
-            total++;
-            if(item.is_101){
-                non_101++
-            }
-            if(item.clone && item.clone.fetch_403){
-                try{
+// let interval = setInterval(async ()=>{
+//     let total = 0;
+//     let non_101 = 0;
+//     let fetch_403 = 0
+//     let connected = 0 
+//     let list_403 = []
+//     for(let i in data){
+//         let total = 0;
+//         let non_101 = 0;
+//         let fetch_403 = 0
+//         let connected = 0 
+//         let success = 0
+//         let sockets = data[i].sockets
+//         sockets.forEach(item=>{
+//             total++;
+//             if(item.is_101){
+//                 non_101++
+//             }
+//             if(item.clone && item.clone.fetch_403){
+//                 try{
 
-                    let cookie_string = item.clone.cookie_string
-                    let session_id = helper.getString(cookie_string.replace(/ /g,'') + ';', 'sessionid=', ';');
-                    list_403.push(session_id)
-                }catch(e){
+//                     let cookie_string = item.clone.cookie_string
+//                     let session_id = helper.getString(cookie_string.replace(/ /g,'') + ';', 'sessionid=', ';');
+//                     list_403.push(session_id)
+//                 }catch(e){
 
-                }
-                fetch_403++;
-            }
-            if(item.socketConnected){
-                connected++;
-            }
+//                 }
+//                 fetch_403++;
+//             }
+//             if(item.socketConnected){
+//                 connected++;
+//             }
+
+//             if(item.logged){
+//                 success++;
+//             }
             
-        })
-        if(total == 0){
-            delete data[i]
-        }
+//         })
+//         if(total == 0){
+//             delete data[i]
+//         }
         
-        console.log(i,(new Date().toLocaleString()),  "total", total, "non_101", non_101, "fetch_403", fetch_403, "connected",connected)
+//         console.log(i,(new Date().toLocaleString()),  "total", total, "non_101", non_101, "fetch_403", fetch_403, "connected",connected, "success",success)
 
-    }
-    // await helper.writeFile({path:'./101.txt', data:list_403.join(',')})
-    // console.log((new Date().toLocaleString()),  "total", total, "non_101", non_101, "fetch_403", fetch_403, "connected",connected)
-},20000)
+//     }
+//     // await helper.writeFile({path:'./101.txt', data:list_403.join(',')})
+//     // console.log((new Date().toLocaleString()),  "total", total, "non_101", non_101, "fetch_403", fetch_403, "connected",connected)
+// },20000)
 class GroupView {
 
     constructor(){
@@ -139,7 +144,7 @@ class GroupView {
                  let clone = new Clone({cookie_string: i, room_id, proxy:  proxy || p, proxy_list})
                 let config_data = { cookie_string: i, proxy_string: proxy || p, useragent: helper.genuaMAC(),rooms: {}, task_id,server_site: "tt1", isShowLog:  false, clone, ex_wrss, wrss_obejct}
                 let socket = new TiktokSocketAuto(config_data)
-                console.log("Start socket", index, (new Date().toLocaleString()))
+                // console.log("Start socket", index, (new Date().toLocaleString()))
                 socket.connect({ room_id})
 
                 if(!data[task_id]){
@@ -164,7 +169,8 @@ class GroupView {
                 return {...pre, [p]: pre[p] ? [...pre[p], cur]: [cur]}
             },{})
             for(let i in grouped_proxy){
-                console.log("Start group", i)
+                let adn = await helper.getLocationProxy(i)
+                console.log("Start group", i, adn)
                 GroupView.startProxyGroupViewers({accounts:grouped_proxy[i] , task_id, proxy, room_id})
             }
         }catch(e){

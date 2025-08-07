@@ -67,34 +67,6 @@ class TikTokSocket {
 
             }
     }
-    async connect1({ room_id }) {
-        let that = this
-        if(this.closed){
-            return false
-        }
-        let max = 3;
-        let proxy_list = []
-        for(let i = 0 ; i < max; i ++){
-            proxy_list.push( "http://babalili121415-zone-resi-region-vn-session-"+helper.generateRandomHex(12)+"-5:Tabdajkhsdf13235@b35301d43d682c1a.xuw.as.pyproxy.io:16666")
-        }
-        let p = "http://babalili121415-zone-resi-region-vn-session-"+helper.generateRandomHex(12)+"-5:Tabdajkhsdf13235@b35301d43d682c1a.xuw.as.pyproxy.io:16666"
-        // proxy_list = [that.proxy_string]
-        // p = that.proxy_string
-        that.alive = true;
-        let res1 = await this.clone.callApi({type: "enter"})
-        let user_id = helper.getString(res1.data,'"user_id":','}')
-        console.log(helper.getTime(),"enter",user_id);
-        // while(true){
-        //     this.clone.proxy = `com86335772-res-VN-Lsid-${helper.getRandomInt(111111111,999999999)}-sesstime-60:PgW1d92K9aMg2r95rY@prem.as.iprocket.io:5959`
-        //     let res1 = await this.clone.callApi({type: "enter"})
-        //     let user_id = helper.getString(res1.data,'"user_id":','}')
-        //     console.log(helper.getTime(),"enter",user_id);
-        //     // await helper.delay(that.getRandomInt(120, 140)*1000)
-        //     await helper.delay(160000)
-        // }
-        
-        console.log("ENTER")
-    }
     async connect({ room_id }) {
         let that = this
         if(this.closed){
@@ -116,11 +88,11 @@ class TikTokSocket {
         // if(
         // //     // that.is_101 && 
         //     !this.wrss ||  this.lastFetch < (Date.now() - 5 * 60000)) {
-        console.log("proxy_string",that.proxy_string)
+        // console.log("proxy_string",that.proxy_string)
         that.start = Date.now();
             if(true){
 
-                await this.clone.checkCookieLive()
+                // await this.clone.checkCookieLive()
                 if(!this.clone.is_cookie_live){
                     this.retryTime = 0;
                     this.retryTimeMax = 0;
@@ -159,13 +131,19 @@ class TikTokSocket {
         //     console.log("Force reconnect")
         //     that.disconnect()
         // },5* 60000)
-        
         let result =  await new Promise(async(r) => {
-            console.log("start socket")
-            // that.proxy_string = "KAOjQTal:3Vo2GjD2@92.112.111.246:30212";
+            console.log("start socket", (new Date().toLocaleString()))
+
+            await helper.delay(30000)
+            // that.proxy_string = "KAOjQTal:3Vo2GjD2@92.112.111.248:35200"
             // that.proxy_string = "5Yvg7Ebz:DUvvwcSw@193.160.216.151:62446"
-            // that.proxy_string = "SbNFop:iMAWfP@180.149.35.225:32305"// tạch
-            // that.proxy_string = "amac129:amac129@1.53.95.152:35879"
+            // that.proxy_string = "UGCyfu:pLOaUI@200.229.24.222:33061"// topproxy
+            // that.proxy_string = "c67r:c67r@160.187.120.106:41969"// topproxy
+            
+            // that.proxy_string = "156.248.84.248:3129"//webshare
+            // that.proxy_string = "khljtiNj3Kd:fdkm3nbjg45d@42.112.113.52:21232"
+            that.proxy_string = helper.getString(that.cookie_string+";", "proxy_socket=",";")
+            console.log("that.proxy_string", that.proxy_string)
             try {
                 let tunnelingAgent
                 let options = {
@@ -245,7 +223,7 @@ class TikTokSocket {
                         if(!that.logged){
 
                             that.logged = true
-                          console.log("Socket success", that.clone.username, (new Date().toLocaleString()))
+                          console.log("Socket success", that.clone.username, room_id, (new Date().toLocaleString()))
                         }
                         let mes = await that.deserializeWebsocketMessage(message.binaryData)
                         // if(mes?.webcastResponse?.internalExt&& mes.webcastResponse.internalExt !=="-"){
@@ -325,7 +303,7 @@ class TikTokSocket {
                         let messageHex =  header + random8Bytes + midfix + idHex + suffix;
                     
                         let message =Buffer.from(messageHex,"hex")
-                        console.log("createImEnterHexMessage", message.toString(),message.toString('hex') )
+                        // console.log("createImEnterHexMessage", message.toString(),message.toString('hex') )
                         return message
                       };
                     // connection.sendBytes(Buffer.from(createHexMessage(that.clone.cursor),"hex"));
@@ -374,6 +352,15 @@ class TikTokSocket {
                     console.log("AckServer",finalHex, message.toString("utf8"))
                     return message
                 }
+                    async function _sendPing2() {
+                        let randomNum = 10000;//that.getRandomInt(2000, 6000)
+                        await helper.delay(randomNum)
+                        if(that.socketConnected){
+                            connection.sendBytes(createMessageClientHBFirst());
+                        }
+                        // setTimeout(() => { if (that.alive) _sendPing2() }, randomNum);
+                        if (that.alive) _sendPing2()
+                    }
                     function createMessageClientHBFirst (){
                         let header = "320270623a026862420a0"
     
@@ -386,10 +373,11 @@ class TikTokSocket {
 
                     connection.sendBytes(createMessageClientHBFirst());
                     connection.sendBytes(createImEnterHexMessage());
-                    that.inter = setInterval(() => {
-                        connection.sendBytes(createMessageClientHBFirst());
+                    _sendPing2()
+                    // that.inter = setInterval(() => {
+                    //     connection.sendBytes(createMessageClientHBFirst());
 
-                    },10000)
+                    // },10000)
                         
                     
           
@@ -509,12 +497,11 @@ class TikTokSocket {
     }
     createUrl({ room_id }) {
         //webcast16-ws-useast5.us.tiktok.com
-        let {cursor} = require("../data_cursor.js")
         let browser_version = encodeURI(this.appversion)
-        let res = `wss://webcast16-ws-alisg.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?aid=1988&app_language=en&app_name=tiktok_web&browser_language=en-US&browser_name=Mozilla&browser_online=true&browser_platform=${this.browser_platform}&browser_version=${browser_version}&compress=gzip&cookie_enabled=true&cursor=${cursor}&debug=false&device_platform=web&heartbeatDuration=0&host=https%3A%2F%2Fwebcast.tiktok.com&identity=audience&imprp=&internal_ext=&live_id=12&room_id=` + room_id + `&screen_height=900&screen_width=1440&tz_name=Asia%2FSaigon&update_version_code=2.0.0&version_code=270000&webcast_sdk_version=2.0.0&wrss=` + (this.wrss ? this.wrss : this.generateRandomString(43))
 
-        res =  `wss://webcast16-ws-alisg.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&browser_platform=${this.clone.browser_platform}&browser_name=Mozilla&browser_version=${browser_version}&browser_online=true&tz_name=Asia/Saigon&app_name=tiktok_web&sup_ws_ds_opt=1&version_code=270000&update_version_code=2.0.0&compress=gzip&wrss=${this.wrss ? this.wrss : this.generateRandomString(43)}&host=https://webcast.tiktok.com&aid=1988&live_id=12&debug=false&app_language=vi-VN&client_enter=1&room_id=${room_id}&identity=audience&history_comment_count=6&heartbeat_duration=0&last_rtt=${this.clone.last_rtt}&internal_ext=${this.internal_ext}&cursor=${this.cursor}&resp_content_type=protobuf&did_rule=3&webcast_language=vi-VN`
-        console.log("res",res)
+        let res =  `wss://webcast16-ws-alisg.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&browser_platform=${this.clone.browser_platform}&browser_name=Mozilla&browser_version=${browser_version}&browser_online=true&tz_name=Asia/Saigon&app_name=tiktok_web&sup_ws_ds_opt=1&version_code=270000&update_version_code=2.0.0&compress=gzip&wrss=${this.wrss ? this.wrss : this.generateRandomString(43)}&host=https://webcast.tiktok.com&aid=1988&live_id=12&debug=false&app_language=vi-VN&client_enter=1&room_id=${room_id}&identity=audience&history_comment_count=6&heartbeat_duration=0&last_rtt=${this.clone.last_rtt}&internal_ext=${this.internal_ext}&cursor=${this.cursor}&resp_content_type=protobuf&did_rule=3&webcast_language=vi-VN`
+        // let res =  `wss://webcast16-ws-alisg.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=en-US&browser_platform=${this.clone.browser_platform}&browser_name=Mozilla&browser_version=${browser_version}&browser_online=true&tz_name=Asia/Saigon&app_name=tiktok_web&sup_ws_ds_opt=1&version_code=270000&update_version_code=2.0.0&compress=gzip&webcast_language=en&wrss=${this.wrss ? this.wrss : this.generateRandomString(43)}&ws_direct=0&aid=1988&live_id=12&app_language=en&client_enter=1&room_id=${room_id}&identity=audience&history_comment_count=6&heartbeat_duration=0&last_rtt=${this.clone.last_rtt}&internal_ext=${this.internal_ext}&cursor=${this.cursor}&resp_content_type=protobuf&did_rule=3`
+        // console.log("res",res)
         return res
         //wss://webcast16-ws-useast1a.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?aid=1988&app_language=en-US&app_name=tiktok_web&browser_language=en&browser_name=Mozilla&browser_online=true&browser_platform=Win32&browser_version=5.0+%28Windows+NT+10.0%3B+Win64%3B+x64%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Chrome%2F106.0.0.0+Safari%2F537.36&cookie_enabled=true&cursor=1744462589876_7492409661476306973_1_1_7492405984984310405_0&internal_ext=fetch_time%3A1744462589876%7Cstart_time%3A0%7Cack_ids%3A%2C%2C%7Cflag%3A0%7Cseq%3A1%7Cnext_cursor%3A1744462589876_7492409661476306973_1_1_7492405984984310405_0%7Cwss_info%3A0-1744462589876-0-0&device_platform=web&focus_state=true&from_page=user&history_len=0&is_fullscreen=false&is_page_visible=true&did_rule=3&fetch_rule=1&last_rtt=0&live_id=12&resp_content_type=protobuf&screen_height=1152&screen_width=2048&tz_name=Europe%2FBerlin&referer=https%3A%2F%2Fwww.tiktok.com%2F&root_referer=https%3A%2F%2Fwww.tiktok.com%2F&host=https%3A%2F%2Fwebcast.tiktok.com&webcast_sdk_version=2.0.0&update_version_code=2.0.0&room_id=7492405931744529173&compress=gzip&wrss=fDNfcXEVrip-lSKL9VX_ZqAmHxmVv0RmHh33bE9oAM4&imprp=&version_code=180800
     }

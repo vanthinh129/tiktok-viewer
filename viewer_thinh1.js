@@ -5,14 +5,19 @@ const Viewer = require("./src/Viewer.tt2");
 const { setTimeout } = require('timers/promises');
 let is_live_end = false;
 let splice_accounts = []
-let cookie_string = 'msToken=xj3fnwqb0BJSrEAoXZq1VG88c1s_vfqnANy2CaH-Sh4zcnJGPFP_nSmJSjT5RChhXQH56NxkZAkw5AFzL1r5h5qd38tjV4ZN7-6dbA-TKGlFmSjRW1d3nHZOajV4xwwhXxUMW1Mr7cxkkvwrRzqWxyMy; odin_tt=d97aca38a74c992c679edfe2e807f66f16eaa497ecb8d6f3784d02c624a58e17269b2977875b1058d03d2885e7040e3faeb63bbe4fa142d9f1088662811e30e3fd3c13357dc3dfd17b78b112315b7e9c; bm_sv=FCBED2CC3058F21B113FB395368287C0~YAAQl74vF53awz2SAQAA3FX/QRmmzBYAnl60GAWiiKcNakYebKxe3b+Odg4HXnWjM8InpLa9XWPqc/lSpqb79g0hSxBHVWjt3QSMwl96WZQWQOjTiZ33Qw0h5ypCIzavCl9QKJOiIu8kngzFL/qKF/u8O7c1pgdbfQIMa7zFQBnlewbPW6Ph+InaXCQgHDYfYz4FiJ/mb626fZVY75DN6rjPThwmyiSWXl8p7WLhc1EQTu/dTdIYi7GC41r6SRrX~1; s_v_web_id=verify_m1oqeua1_ev2mKSmd_6kDF_496X_85eS_39c4y0wdUdiT; ak_bmsc=DCAE43000450BB1E40DB50AE220EA44B~000000000000000000000000000000~YAAQvL4vF4t9xj2SAQAAUy7/QRk+RABj53GKylr5aN88d24Svhojwsf2oFkn2U3tdH5UbjCwpJtwtsiznWnCc5j9ZhpMngiPfunutSfn0dKRNIoFZ1gAOoI7CXRA3r8OUgLPAzj6hpnwv+TFPkY+FtyWCzOBROX1dPm/h6h3i+VR/Y5YRDz4ztK6cBXUpoPEBkIFzgvIOHtoiyHVKhkZTupHO9caTUHe1vROROKvWXA8yxl5BmTG6+T59CKCteBwy6fpgDhrhMvbws4tmxI/L0NXOG6L2tTiSwPgyApNgUP8p2ThsjT2gxorhNHgqZlt1rgUWsUlCeWdsV8m8o7xXFt45xRS1I89F7N/j0PwEBQvj7BIb3P7sofSKTJwM1E9HMAu57o09dLnAA==; passport_csrf_token_default=86644a24370ec3fd846c0d663febfa78; passport_csrf_token=86644a24370ec3fd846c0d663febfa78; tt-target-idc=alisg; tt_chain_token=S8sY0WpU+gPlkFZXTztZwQ==; tt-target-idc-sign=Xtz2QBD_wSnRnlHXccZggAVXt0TjCvsNhoX5UIeu6j0HvTqsfZskO-buAIxrey1uELdS-QcBG1qCYw8A3CeSRnrgPkv901YWmdBLGpjzNZAqTPTVa64YfkxgPuQLGpjyKxZSRs0TLwMogdetjJX1j0w7sks3rXGsEr9X4tePPcSTEDdcMl_vfLYsghVZGwFWNSkwLOE1NTo5Q8aBtJiF2e2enE0Ckciorz9Jkk79mTjaO4EY_jEL0pd4SfppVI4I9D1P8HhCUoXhfo4Ex_4Ayaqhc7Z2Yw_deEIZKTV8fvVorSTSVKpUMdoLCPSLgtnwqJpuFv7_sCXBwrbW8ApY0nv2fQ31PbX3UnOXK0nM_wCM1aWGcYSNXCZFsaUh0wHrqKe9CpJnN54jDWZWHe9QV9pvubBhmfH8OTimaPza3ONmdHrnLmmU7iXKAqa88qjjDdkBu37vhyjRFucqOty5KAxWQuHJtR-Xrb8WU-n2VWZH3sOR3O_T3t9yAfR9kMnh; ttwid=1%7CPDo82SqhHwtNxFDR0G5jnFaU_39CoSz_YHU8U6rsZaE%7C1727684106%7C6238771daf4c29afa5aefe2923e1fde937a2cd97661b36872f9cf0c6e4251440; tt_csrf_token=j8G61Oxa-k4D8CidvMfhA-LEsBFN8vEMNQRs; store-country-code-src=uid; cmpl_token=AgQQAPOFF-RO0rbEszUBvl08_JvEKX8R_5AOYNTHmQ; store-idc=alisg; sid_ucp_v1=1.0.0-KDJmY2UyMWI3MDg1MzY1MTAwNTYwNGJiOTUwYWViNzM5NTg1Y2NmOTQKIgiFiLLMqLKX_WYQvLvptwYYswsgDDC7u-m3BjgBQOsHSAQQAxoGbWFsaXZhIiAzMzMzOWQ2ZTVlMzg2MjRkM2NlM2NhYmMzMzMxNmQzZQ; uid_tt=b3e15fd03daa6e157495c1130797e072a94a28b5b6a81fc43592ec56ef528628; sessionid=33339d6e5e38624d3ce3cabc33316d3e; sid_guard=33339d6e5e38624d3ce3cabc33316d3e%7C1727684028%7C15552000%7CSat%2C+29-Mar-2025+08%3A13%3A48+GMT; store-country-code=vn; sessionid_ss=33339d6e5e38624d3ce3cabc33316d3e; ssid_ucp_v1=1.0.0-KDJmY2UyMWI3MDg1MzY1MTAwNTYwNGJiOTUwYWViNzM5NTg1Y2NmOTQKIgiFiLLMqLKX_WYQvLvptwYYswsgDDC7u-m3BjgBQOsHSAQQAxoGbWFsaXZhIiAzMzMzOWQ2ZTVlMzg2MjRkM2NlM2NhYmMzMzMxNmQzZQ; uid_tt_ss=b3e15fd03daa6e157495c1130797e072a94a28b5b6a81fc43592ec56ef528628; multi_sids=7420346220000609285%3A33339d6e5e38624d3ce3cabc33316d3e; sid_tt=33339d6e5e38624d3ce3cabc33316d3e'
 let room_id = "7404131027976817425";
 if(process.argv[2]){
     room_id = process.argv[2].trim()
 }
 const main = async () =>{
     const assert = require('assert');
-
+    if(room_id.includes('@')){
+        let username = helper.getString(room_id+'/','@','/')
+        let data_room = await getRoomData(username);
+        if(data_room && data_room.roomId && data_room.is_live){
+            room_id = data_room.roomId
+        }
+    }
     process.on('uncaughtException', (error) => {
         if (error instanceof assert.AssertionError) {
           console.error('Assertion Error:', error.message);
@@ -27,7 +32,7 @@ const main = async () =>{
     // let acc_string = await helper.strData(path.resolve("./data_test/data_test_vps_account_thinh.txt"));
     let acc_die_string = '';//await helper.strData(path.resolve("./101.txt"));
     let acc_die_array = (acc_die_string.split(','))
-    let acc_string = await helper.strData(path.resolve("./data_test/acc_socket.txt"));
+    let acc_string = await helper.strData(path.resolve("./data_test/acc_socket1.txt"));
     let proxies_str =await helper.strData(path.resolve("./data_test/acc_socket_proxy.txt"));
     let proxies = helper.parserAccounts({ acc_string: proxies_str, getIndex:0, number_slice: 1000, key: ",", number_ignore:0, format: "proxy", key_format: "|", item_return_type: "proxy"})
     proxies = helper.shuffle(proxies)
@@ -77,7 +82,7 @@ const main = async () =>{
     proxies = getProxy(Math.floor(accounts.length/acc_per_proxy)+1)
     proxies = await helper.getProxySite(120)
     proxies = helper.shuffle(proxies)
-
+    // proxies = ["UGCyfu:pLOaUI@200.229.24.222:33061"]
     // console.log(accounts, proxies)
     // process.exit(1)
     let tokens =  [
@@ -116,8 +121,8 @@ const main = async () =>{
     //     Viewer.startViewers({accounts:_accounts, task_id: 1, room_id, tokens})
     // }, 140000)
     // await checkViewer(room_id);
-    let is_start = await checkStartViewer(room_id)
-    // let is_start = false
+    // let is_start = await checkStartViewer(room_id)
+    let is_start = true
     if(is_start){
         Viewer.startViewers({accounts:_accounts, task_id: 1, room_id, tokens})
 
@@ -136,6 +141,39 @@ const main = async () =>{
             // Viewer.stopViewers({ task_id: 2 })
 
         // }
+}
+async function getRoomData(username){
+    let proxies = await helper.getProxySite();
+    try {
+        // console.log("🔍 Lấy roomId thật từ TikTok cho username:", username);
+        if (proxies && proxies.length > 0) {
+            let proxy_random = "http://"+proxies[Math.floor(Math.random() * proxies.length)];
+            let dataUser = await helper.getRoomId3({name: username, proxy: proxy_random,retryCount:1});
+            if (dataUser && dataUser.data && dataUser.data.user && dataUser.data.user.roomId) {
+                roomId = dataUser.data.user.roomId;
+                // console.log("✅ Lấy được roomId thật:", roomId);
+                return {
+                    roomId: roomId,
+                    roomUrl: `https://www.tiktok.com/@${username}/live/`,
+                    profile_id: username,
+                    status: dataUser.data.user.status,
+                    is_live: (dataUser.data.user.status == 2),
+                    userCount: dataUser.data.liveRoom.liveRoomStats.userCount,
+                    enterCount: dataUser.data.liveRoom.liveRoomStats.enterCount,
+                };
+            } else {
+                console.error("❌ Không lấy được roomId từ TikTok, có thể user không live");
+                return;
+            }
+        } else {
+            console.error("❌ Không có proxy để lấy roomId");
+            return;
+        }
+    } catch (err) {
+        console.error("❌ Lỗi khi lấy roomId từ TikTok:", err);
+        
+        return;
+    }
 }
 function getProxy(number=1){
     let proxys = [];
@@ -157,13 +195,13 @@ async function checkViewer(room_id){
         return;
     }
     let proxy = ''
-    let res = await helper.getRoomInfo({room_id: room_id,proxies: [],proxy: helper.parserProxyString(proxy),cookie_string});
+    let res = await helper.getRoomInfo({room_id: room_id,proxies: [],proxy: helper.parserProxyString(proxy),cookie_string:""});
     let log  = `room: ${room_id} now: ${res.view_count} alive: ${res.is_alive}`
     if(!res.is_alive && res.view_count > 0){
         is_live_end = true
     }
     
-    console.log(helper.getTime(),"Info -- ",log);
+    // console.log(helper.getTime(),"Info -- ",log);
     if(is_live_end){
         for(let index = 0 ; index < splice_accounts.length; index ++ ){
             Viewer.stopViewers({ task_id: index+1 })
@@ -175,7 +213,7 @@ async function checkViewer(room_id){
 async function checkStartViewer(room_id){
     let proxy = ''
     console.log("before check")
-    let res = await helper.getRoomInfo({room_id: room_id,proxies: [],proxy: helper.parserProxyString(proxy),cookie_string});
+    let res = await helper.getRoomInfo({room_id: room_id,proxies: [],proxy: helper.parserProxyString(proxy),cookie_string:""});
     let log  = `room: ${room_id} now: ${res.view_count} alive: ${res.is_alive}`
     console.log(helper.getTime(),"Info -- ",log);
     if(!res.is_alive && res.view_count > 0){
