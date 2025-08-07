@@ -149,7 +149,7 @@ class GroupView {
                 // console.log("Start socket", index, (new Date().toLocaleString()))
                 socket.connect({ room_id})
                 setTimeout(function(){
-                    // socket.switchRoom({room_id:"7535866341132815122"})
+                    socket.switchRoom({room_id:"7535861066103933752"})
                 }, 90000)
                 if(!data[task_id]){
                     data[task_id] = {}

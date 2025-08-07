@@ -65,7 +65,7 @@ async function runViewer(room_id){
     await checkViewer(room_id);
     if(is_live_end){
         for(let index = 0 ; index < splice_accounts.length; index ++ ){
-            Viewer.stopViewers({ task_id: index+1 })
+            // Viewer.stopViewers({ task_id: index+1 })
         }
     }
     async function checkViewer(room_id){
