@@ -216,7 +216,7 @@ class TikTokSocket {
                     if(that.isShowLog)
                     console.log(that.sessionid, 'connectFailed Error: ' + error,(new Date().toLocaleString()));
                     that.socketConnected = false
-                    // await helper.delay(that.getRandomInt(1500, 2500))
+                    // await helper.delay(helper.getRandomInt(1500, 2500))
                     r(false)
                 });
 
@@ -234,7 +234,7 @@ class TikTokSocket {
                         if(that.isShowLog)
                         console.log(that.sessionid, "Connection Error: " + error.toString(),(new Date().toLocaleString()),that.proxy_string);
                         that.socketConnected = false
-                        // await helper.delay(that.getRandomInt(1500, 2500))
+                        // await helper.delay(helper.getRandomInt(1500, 2500))
                         r(false)
                     });
                     connection.on('close',async function () {
@@ -250,7 +250,7 @@ class TikTokSocket {
                             let proxies = helper.getProxySite(120)
                               proxies = helper.shuffle(proxies)
                               that.proxy_string = proxies[Math.floor(Math.random()*proxies.length)]
-                        await helper.delay(that.getRandomInt(1500, 2500))
+                        await helper.delay(helper.getRandomInt(1500, 2500))
                         r(false)
                     });
                     connection.on('message', async function (message) {
