@@ -118,7 +118,7 @@ class TikTokSocket {
         });
         return Buffer.from(webcastPushFrame.finish())
     }
-    async switchRoom({room_id, proxy}){
+    async switchRoom({room_id, proxy_list}){
         let that = this
         if(that.room_id == room_id){
             return true
@@ -126,9 +126,9 @@ class TikTokSocket {
         console.log(`Switching to room: ${room_id}`);
         that.clone.room_id = room_id
         that.room_id = room_id
-        if(proxy){
-            that.clone.proxy = proxy
-            that.clone.proxy_list = [proxy]
+        if(proxy_list){
+            that.clone.proxy_list = proxy_list
+            that.clone.proxy = proxy_list[Math.floor(Math.random()*proxy_list.length)]
         }
         try {
             await that.clone.callApi({type: "enter"});

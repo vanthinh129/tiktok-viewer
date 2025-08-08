@@ -198,14 +198,13 @@ class GroupView {
         
     }  
     
-    static async changeRoom({ task_id, room_id, proxy}){
+    static async changeRoom({ task_id, room_id, proxy_list}){
         console.log("Change room -- task_id:",task_id, " room_id:", room_id)
         try{
             if(data[task_id]){
                 for(let i = 0 ; i< data[task_id].sockets.length; i ++){
-                    data[task_id].sockets[i].switchRoom({room_id, proxy});
+                    data[task_id].sockets[i].switchRoom({room_id, proxy_list});
                 }
-                data[task_id].sockets = [];
             }
             
         }catch(e){

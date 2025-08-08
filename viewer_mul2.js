@@ -144,8 +144,7 @@ async function checkFile(){
                     console.log("Thay đổi room data_room_mul.js")
                     let proxies = await helper.getProxySite(120)
                     proxies = helper.shuffle(proxies)
-                    let proxy = proxies[Math.floor(Math.random() * proxies.length)]
-                    Viewer.changeRoom({ task_id: 1, room_id: room_id, proxy })
+                    Viewer.changeRoom({ task_id: 1, room_id: room_id, proxy_list: proxies })
                 }
             }
         }
