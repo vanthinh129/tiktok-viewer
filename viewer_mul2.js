@@ -29,13 +29,15 @@ async function runViewer(room_id){
     let is_live_end = false
     let acc_die_string = '';//await helper.strData(path.resolve("./101.txt"));
     let acc_die_array = (acc_die_string.split(','))
-    let acc_string = await helper.strData(path.resolve("./data_test/acc_socket2.txt"));
+    let acc_string = await helper.strData(path.resolve("./data_test/acc_socket.txt"));
     let proxies_str =await helper.strData(path.resolve("./data_test/acc_socket_proxy.txt"));
     let proxies = helper.parserAccounts({ acc_string: proxies_str, getIndex:0, number_slice: 1000, key: ",", number_ignore:0, format: "proxy", key_format: "|", item_return_type: "proxy"})
     proxies = helper.shuffle(proxies)
-    let accounts = helper.parserAccounts({ acc_string, getIndex:0, number_slice: 100, key: "\n", number_ignore:0, format: "u|p|t1|t2|cookie_string", key_format: "|", item_return_type: "cookie_string", preReturn:(object, cookie_string)=>{
+    let list_accept =`hauwaucorreiacardoso307,isamelocastro1751989,lubaazevedocunha2732001,mamudacavalcantirocha17,nafisaferreiraalves1761,nafisatcardosoalmeida23,olusegunoliveiracastro1,samailapereiracosta2231,theophilussousalima1011,timothybarbosaoliveira2,abdulrasheedfernandesba,abiolaferreiracarvalho1,adeolapereirapinto17219,adewalesousacardoso1611,ajayicarvalhomelo238198,amarachiaraujodias15219,aritoliveiraferreira239,babangidadiasrocha11519,bilkisudiasmelo3011988,charityalvescarvalho167,claraaraujocosta2781997,ejirooliveiralima221199,folukearaujoazevedo2011,ganasousagoncalves24719,jonahcostaalves2861974,josephrochacorreia18820,margaretcostacavalcanti,piuspintoalves1211976,rufaisilvacosta1731972,sodiqoliveirafernandes2,thankgodgoncalvescardos`.trim().split(',')
+    // list_accept =[]
+    let accounts = helper.parserAccounts({ acc_string, getIndex:0, number_slice: 200, key: "\n", number_ignore:0, format: "u|p|t1|t2|cookie_string", key_format: "|", item_return_type: "cookie_string", preReturn:(object, cookie_string)=>{
         let sessionid = helper.getString(cookie_string,'sessionid=',';')
-        if(!acc_die_array.includes(sessionid)){
+        if(!acc_die_array.includes(sessionid) && (list_accept.length == 0 || list_accept.includes(object.u))){
             // console.log(sessionid)
             return cookie_string && cookie_string.includes("sessionid=")
         }else{
@@ -53,19 +55,22 @@ async function runViewer(room_id){
         let accs = splice_accounts[index];
         let proxy = proxies[index];
         accs = accs.map(account => {
-            account = account +";proxy="+proxy+";"
+            // account = account +";proxy="+proxy+";"
+            account = account +";proxy="+proxy+";proxy_socket=amac129:amac129@157.15.39.60:31997;"
             return account
         });
         _accounts = [..._accounts, ...accs]
 
     }
+    // console.log(_accounts.length)
+    // process.exit(1)
     let is_start = true
     Viewer.startViewers({accounts:_accounts, task_id: 1, room_id, tokens})
 
     await checkViewer(room_id);
     if(is_live_end){
         for(let index = 0 ; index < splice_accounts.length; index ++ ){
-            // Viewer.stopViewers({ task_id: index+1 })
+            Viewer.stopViewers({ task_id: index+1 })
         }
     }
     async function checkViewer(room_id){
@@ -127,12 +132,21 @@ async function checkFile(){
     try{
         if(time_check){
             helper.clearCacheForFile(__dirname+"/data_room_mul.js")
-            let {time} = require(__dirname+"/data_room_mul.js")
+            let {time, room_id} = require(__dirname+"/data_room_mul.js")
             if(time != time_check){
-                console.log("Thay đổi file data_room_mul.js")
-                Viewer.stopViewers({ task_id: 1 })
-                await helper.delay(10000)
-                process.exit(1)
+                time_check = time
+                if(room_id.includes(',')){
+                    console.log("Thay đổi file data_room_mul.js")
+                    Viewer.stopViewers({ task_id: 1 })
+                    await helper.delay(10000)
+                    process.exit(1)
+                }else{
+                    console.log("Thay đổi room data_room_mul.js")
+                    let proxies = await helper.getProxySite(120)
+                    proxies = helper.shuffle(proxies)
+                    let proxy = proxies[Math.floor(Math.random() * proxies.length)]
+                    Viewer.changeRoom({ task_id: 1, room_id: room_id, proxy })
+                }
             }
         }
     }catch(e){

@@ -2125,6 +2125,43 @@ getRoomInfo2 :async function ({room_id, name, proxy, cookie_string, retryCount})
   subArray :function(array, length){
     return [(helper.splice(array, length))[0], array.slice(length)]
   },
+  parseProxy: function(proxy_string) {
+    var proxy_data = {
+        proxy: {
+            host: '',
+            port: ''
+        }
+    }
+    var proxy_array = proxy_string.replace('http://', '').replace('@', ':').split(':');
+    if (proxy_array.length == 4) {
+        proxy_data = {
+            proxy: {
+                host: proxy_array[2],
+                port: parseInt(proxy_array[3]),
+                proxyAuth: `${proxy_array[0]}:${proxy_array[1]}`
+            }
+        };
+    } else if (proxy_array.length == 2) {
+        proxy_data = {
+            proxy: {
+                host: proxy_array[0],
+                port: parseInt(proxy_array[1])
+            }
+        };
+    }
+    return proxy_data
+  },
+
+  generateRandomString: function(length = 43) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    const charLen = characters.length;
+    for (let i = 0; i < length; i++) {
+        const randomNum = helper.getRandomInt(0, charLen - 1)
+        result += characters.charAt(randomNum);
+    }
+    return result;
+  },
   parserCookieString: function (string){
  
     let array = [

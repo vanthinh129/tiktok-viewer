@@ -148,9 +148,9 @@ class GroupView {
                 let socket = new TiktokSocketAuto(config_data)
                 // console.log("Start socket", index, (new Date().toLocaleString()))
                 socket.connect({ room_id})
-                setTimeout(function(){
-                    socket.switchRoom({room_id:"7535861066103933752"})
-                }, 90000)
+                // setTimeout(function(){
+                //     socket.switchRoom({room_id:"7535972503173909266"})
+                // }, 60000)
                 if(!data[task_id]){
                     data[task_id] = {}
                 }
@@ -194,6 +194,22 @@ class GroupView {
             
         }catch(e){
             console.log("stopViewers error",e,(new Date().toLocaleString()))
+        }
+        
+    }  
+    
+    static async changeRoom({ task_id, room_id, proxy}){
+        console.log("Change room -- task_id:",task_id, " room_id:", room_id)
+        try{
+            if(data[task_id]){
+                for(let i = 0 ; i< data[task_id].sockets.length; i ++){
+                    data[task_id].sockets[i].switchRoom({room_id, proxy});
+                }
+                data[task_id].sockets = [];
+            }
+            
+        }catch(e){
+            console.log("changeRoom error",e,(new Date().toLocaleString()))
         }
         
     }   
