@@ -70,6 +70,11 @@ async function getalluser(){
     folder_accs.push(`./data_test/acc_socket1.txt`)
     folder_accs.push(`./data_test/acc_socket.txt`)
     folder_accs.push(`./data_test/acc_socket2.txt`)
+    folder_accs.push(`./data_test/acc_socket3.txt`)
+    folder_accs.push(`./data_test/acc_socket4.txt`)
+
+    folder_accs.push(`./data_test/acc_socket_manual.txt`)
+    folder_accs.push(`./data_test/acc_socket_edu.txt`)
     // folder_accs = [];
     // for (let i = 13; i <= 13; i++) {
     //     folder_accs.push(`./data_test/acc_test${i}.txt`)

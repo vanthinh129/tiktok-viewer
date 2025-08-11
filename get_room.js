@@ -127,7 +127,7 @@ let maingetroom = async () => {
     console.log(helper.getTime(),'room_id',room_select.username,room_id,room_select.user_count,`https://www.tiktok.com/@${room_select.username}/live`,'total',room_ids.length)
     console.log(helper.getTime(),"room_ids_string",room_ids_string)
     if(room_id)
-    await helper.writeFile({path:__dirname+"/data_room_mul.js", data: `module.exports={"time":"${Date.now()}","room_id":"${room_ids_string}"}`})
+    await helper.writeFile({path:__dirname+"/data_room_mul.js", data: `module.exports={"time":"${Date.now()}","room_id":"${room_ids_string}","is_off": false}`})
     
 }
 async function onlineRoom(room_id){

@@ -1,1 +1,1 @@
-module.exports={"time":"1754626193349","room_id":"7536026333391112980"}
+module.exports={"time":"1754909670017","room_id":"7537267934889118482","is_off": false}

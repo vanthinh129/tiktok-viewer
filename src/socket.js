@@ -29,6 +29,7 @@ class TikTokSocket {
         this.onMessage = onMessage;
         this.clone = clone
         this.room_id = clone.room_id
+        this.room_id_off = "7492838577072540436"
         this.wrss = wrss;
         this.isShowLog= isShowLog;
         this.task_id= task_id || "";
@@ -118,27 +119,36 @@ class TikTokSocket {
         });
         return Buffer.from(webcastPushFrame.finish())
     }
-    async switchRoom({room_id, proxy_list}){
+    async switchRoom({room_id, proxy_list, is_off}){
         let that = this
         if(that.room_id == room_id){
             return true
         }
-        console.log(`Switching to room: ${room_id}`);
-        that.clone.room_id = room_id
-        that.room_id = room_id
+        let is_connect = (that.socketConnected && that.connection)? true: false
+        console.log(`Switching to room: ${room_id}`,is_connect);
+        if(!is_connect){
+            return this.connect({ room_id });
+        }
         if(proxy_list){
             that.clone.proxy_list = proxy_list
             that.clone.proxy = proxy_list[Math.floor(Math.random()*proxy_list.length)]
         }
         try {
-            await that.clone.callApi({type: "enter"});
+            that.clone.room_id = room_id
+            that.room_id = room_id
+            if(!is_off && room_id != that.room_id_off){
+                // await that.clone.callApi({type: "leave"});
+                // await helper.delay(61000)
+                // console.log("enter switch room",that.clone.proxy, that.proxy_string)
+                await that.clone.callApi({type: "enter"});
+            }
             if(that.socketConnected && that.connection) {
                 let hb_first = that.sendHeartbeat(that.room_id)
                     that.connection.sendBytes(hb_first);
                     await helper.delay(1000)
                     that.connection.sendBytes(that.messageSwitchRooms(that.room_id));
-                    console.log(`Switch room message sent for room: ${room_id}`);
-                    console.log(`Switch room message (base64): ${that.messageSwitchRooms(that.room_id).toString('base64')}`);
+                    // console.log(`Switch room message sent for room: ${room_id}`);
+                    // console.log(`Switch room message (base64): ${that.messageSwitchRooms(that.room_id).toString('base64')}`);
             }
             
             return true;
@@ -150,20 +160,24 @@ class TikTokSocket {
     async connect({ room_id }) {
         let that = this
         that.room_id = room_id
+        that.clone.room_id = room_id
         if(this.closed){
             return false
         }
         that.alive = true;
         that.start = Date.now();
-            // await this.clone.checkCookieLive()
+        await this.clone.checkCookieLive()
         if(!this.clone.is_cookie_live){
+            console.log("logout", this.clone.username)
             this.retryTime = 0;
             this.retryTimeMax = 0;
             this.retryTimeFull = 0;
-            console.log("Cookie die")
+            // console.log("Cookie die", )
             return false
         }
-        let res1 = await this.clone.callApi({type: "enter"})
+        if(that.room_id != that.room_id_off){
+            let res1 = await this.clone.callApi({type: "enter"})
+        }
         // console.log("ENTER")
         this.enter = true
         this.clone.setCursor  = true
@@ -176,7 +190,7 @@ class TikTokSocket {
         let result =  await new Promise(async(r) => {
             console.log("start socket", (new Date().toLocaleString()))
 
-            await helper.delay(30000)
+            await helper.delay(1000)
             if(that.cookie_string.includes("proxy_socket")){
                 that.proxy_string = helper.getString(that.cookie_string+";", "proxy_socket=",";")
             }else{
@@ -246,12 +260,11 @@ class TikTokSocket {
                         that.clone.wrss = ""
                         that.clone.internal_ext = ""
                         that.clone.cursor = ""
-                        clearInterval(that.inter)
-                            let proxies = helper.getProxySite(120)
-                              proxies = helper.shuffle(proxies)
-                              that.proxy_string = proxies[Math.floor(Math.random()*proxies.length)]
-                        await helper.delay(helper.getRandomInt(1500, 2500))
-                        r(false)
+                        //     let proxies = helper.getProxySite(120)
+                        //       proxies = helper.shuffle(proxies)
+                        //       that.proxy_string = proxies[Math.floor(Math.random()*proxies.length)]
+                        // await helper.delay(helper.getRandomInt(1500, 2500))
+                        // r(false)
                     });
                     connection.on('message', async function (message) {
                         if(!that.logged){
@@ -260,7 +273,7 @@ class TikTokSocket {
                         }
                     });
                     async function _sendPing2() {
-                        let randomNum = 10000;
+                        let randomNum = 4000;
                         await helper.delay(randomNum)
                         if (that.socketConnected) {
                             connection.sendBytes(that.sendHeartbeat(that.room_id));
@@ -291,7 +304,9 @@ class TikTokSocket {
                 if (tunnelingAgent) {
                     option.agent = tunnelingAgent
                 }
-                client.connect(that.createUrl({ room_id }), null, null, headers, option);
+                let url_string = that.createUrl({ room_id })
+                // console.log("url_string", url_string)
+                client.connect(url_string, null, null, headers, option);
 
             } catch (e) {
                 console.log("error connect:", e)

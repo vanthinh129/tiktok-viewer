@@ -174,7 +174,7 @@ class GroupView {
             },{})
             for(let i in grouped_proxy){
                 let adn = await helper.getLocationProxy(i)
-                console.log("Start group", i, adn)
+                // console.log("Start group", i, adn)
                 GroupView.startProxyGroupViewers({accounts:grouped_proxy[i] , task_id, proxy, room_id})
             }
         }catch(e){
@@ -198,12 +198,12 @@ class GroupView {
         
     }  
     
-    static async changeRoom({ task_id, room_id, proxy_list}){
+    static async changeRoom({ task_id, room_id, proxy_list, is_off}){
         console.log("Change room -- task_id:",task_id, " room_id:", room_id)
         try{
             if(data[task_id]){
                 for(let i = 0 ; i< data[task_id].sockets.length; i ++){
-                    data[task_id].sockets[i].switchRoom({room_id, proxy_list});
+                    data[task_id].sockets[i].switchRoom({room_id, proxy_list, is_off});
                 }
             }
             

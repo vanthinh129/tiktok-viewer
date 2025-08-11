@@ -46,6 +46,7 @@ class Clone {
   constructor({ cookie_string, task_id, room_id,proxy, proxy_list }) {
     this.task_id = task_id;
     this.cookie_string = cookie_string
+    this.username = getString(cookie_string + ';', 'username=', ';') || this.session_id;
     this.room_id = room_id;
     this.proxy = proxy;
     this.proxy_list =proxy_list
@@ -100,6 +101,29 @@ class Clone {
         await delay(1000)
     }
   }
+  async getWid(){
+    let cookie = this.cookie_string
+    let url = `https://www.tiktok.com/api/v1/web-cookie-privacy/config?locale=en&appId=1988&theme=default&tea=1`
+    const options = {
+        url: url,
+        method:"GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Cookie":  cookie,
+          "User-Agent": userAgentDefault
+        },
+        proxy: this.proxy,
+        proxy_list: [this.proxy]
+    }
+    let res = await helper.makeRequest(options)
+    try{
+        let wid = res.bodyJson.body.consent.wid
+        return wid
+    }catch(e){
+        console.log(res.bodyJson)
+        return null
+    }
+  }
   async callApi({ type }) {
     let { cookie_string, room_id, msToken: cmsToken, session_id: csession_id, timeout  } = this
     cookie_string = cookie_string.replace(/ /g,'')
@@ -111,10 +135,16 @@ class Clone {
     this.session_id = session_id;
     this.username = getString(cookie_string + ';', 'username=', ';') || this.session_id;
     let verifyFp = getString(cookie_string.replace(/ /g,'') + ';', 'verifyFp=', ';') || getString(cookie_string.replace(/ /g,'') + ';', 's_v_web_id=', ';')
-    this.device_id = getString(cookie_string + ';', 'device_id=', ';') || getString(cookie_string + ';', ';wid=', ';') || this.device_id
+    this.device_id = getString(cookie_string + ';', 'device_id=', ';') || getString(cookie_string + ';', ';wid=', ';');// || this.device_id
+    if(!this.device_id){
+      this.device_id = await this.getWid()
+      console.log(this.username,"device_id",this.device_id)
+    }
     // this.device_id = "7534355"+getRandomInt(187248723442,934782374123)//7534355227077674503
     let device_id = this.device_id
-    // console.log("device_id",device_id)
+    if(!device_id){
+      return false;
+    }
     // process.exit(1)
     try {
         if (session_id == "") {
@@ -139,6 +169,7 @@ class Clone {
                  url = `https://webcast.tiktok.com/webcast/room/enter/?aid=1988&app_language=vi&app_name=tiktok_web&browser_language=vi-VN&browser_name=Mozilla&browser_online=true&browser_platform=MacIntel&browser_version=${encodeURIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=web_h264&focus_state=true&from_page=user&history_len=4&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=&referer=&region=VN&screen_height=900&screen_width=1440&tz_name=Asia%2FSaigon&webcast_language=vi-VN`
 
                  url = `https://webcast.tiktok.com/webcast/room/enter/?aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi&browser_name=Mozilla&browser_online=true&browser_platform=${browser_platform}&browser_version=${encodeURIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=${device_type}&focus_state=true&from_page=&history_len=4&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=VN&referer=&region=VN&root_referer=&screen_height=982&screen_width=1512&tz_name=Asia%2FSaigon&user_is_login=true&verifyFp=${verifyFp}&webcast_language=vi-VN`
+                 url = `https://webcast.tiktok.com/webcast/room/enter/?aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi&browser_name=Mozilla&browser_online=true&browser_platform=${browser_platform}&browser_version=${encodeURIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=${device_type}&focus_state=true&from_page=&history_len=4&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=VN&referer=${encodeURIComponent("https://www.tiktok.com/live")}&region=VN&root_referer=${encodeURIComponent("https://www.tiktok.com/live")}&screen_height=982&screen_width=1512&tz_name=Asia%2FSaigon&user_is_login=true&verifyFp=${verifyFp}&webcast_language=vi-VN`
                 //  url = `https://webcast.tiktok.com/webcast/room/enter/?aid=1988&app_language=vi-VN&app_name=tiktok_web&browser_language=vi&browser_name=Mozilla&browser_online=true&browser_platform=MacIntel&browser_version=${this.encodeRFC3986URIComponent(appVersionDefault)}&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=${device_id}&device_platform=web_pc&device_type=${device_type}&focus_state=true&from_page=&history_len=0&is_fullscreen=false&is_page_visible=true&os=mac&priority_region=&referer=&region=VN&screen_height=${screen_height}&screen_width=${screen_width}&tz_name=Asia%2FBangkok&user_is_login=true&verifyFp=${verifyFp}&webcast_language=vi-VN`
                 _bodyJson = {enter_source: "others-others", room_id: room_id}
                 break;
@@ -199,13 +230,13 @@ class Clone {
         body: bodyEncoded,
         isRetry: false
         };
-        if(data_gen && data_gen["tt-ticket-guard-client-data"] && data_gen["tt-ticket-guard-public-key"]){
-          options.headers["tt-ticket-guard-client-data"] = data_gen["tt-ticket-guard-client-data"]
-          options.headers["tt-ticket-guard-iteration-version"] = 0
-          options.headers["tt-ticket-guard-public-key"] = data_gen["tt-ticket-guard-public-key"]
-          options.headers["tt-ticket-guard-version"] = 2
-          options.headers["tt-ticket-guard-web-version"] = 1
-        }
+        // if(data_gen && data_gen["tt-ticket-guard-client-data"] && data_gen["tt-ticket-guard-public-key"]){
+        //   options.headers["tt-ticket-guard-client-data"] = data_gen["tt-ticket-guard-client-data"]
+        //   options.headers["tt-ticket-guard-iteration-version"] = 0
+        //   options.headers["tt-ticket-guard-public-key"] = data_gen["tt-ticket-guard-public-key"]
+        //   options.headers["tt-ticket-guard-version"] = 2
+        //   options.headers["tt-ticket-guard-web-version"] = 1
+        // }
      
         let data_page = await helper.makeRequest(options);
         // process.exit(1)
@@ -359,7 +390,7 @@ fetch() {
                   let {idHexServer , part}= getIdHexServer(hex)
                   if(!this.idHexServer){
                     this.idHexServer = idHexServer
-                    console.log("idHexServer",idHexServer)
+                    // console.log("idHexServer",idHexServer)
                     this.part = part
                   }
                 
@@ -441,7 +472,7 @@ fetch() {
              if(!done){
                 done = true;
                 if(data_page.error){
-                  console.log("error fetch",this.session_id, data_page.error)
+                  console.log("error fetch",this.session_id, data_page.error,this.proxy)
                 }
                 if(data_page.status == 403){
                   console.log("fetch 403",this.session_id)

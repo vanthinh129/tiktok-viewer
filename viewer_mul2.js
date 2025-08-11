@@ -3,6 +3,7 @@ const { spawn } = require('child_process');
 
 const helper = require("./src/helper")
 const Viewer = require("./src/Viewer.tt2");
+const BrowserService = require("./src/BrowserService");
 // const [,, targetFile, ...args] = process.argv;
 let targetFile = "viewer_thinh1.js"
 if (!targetFile) {
@@ -10,6 +11,22 @@ if (!targetFile) {
   process.exit(1);
 }
 let time_check = 0
+async function restartBrowser(time_sec){
+    console.log(`Setting up browser restart every ${time_sec} seconds`);
+    let restartCount = 0;
+    // Sử dụng setInterval thay vì while(true) để tránh vấn đề với event loop
+    setInterval(async () => {
+        restartCount++;
+        // console.log(`[${new Date().toISOString()}] Scheduled browser restart #${restartCount}`);
+        try {
+            // Cập nhật instance browser
+            await BrowserService.updateInstance("new");
+            // console.log(`Browser instance updated successfully`);
+        } catch (e) {
+            // console.error(`[ERROR] Failed to update browser instance:`, e);
+        }
+    }, time_sec * 1000);
+}
 function runScript(args = []) {
   const child = spawn('node', [targetFile, ...args]);
 
@@ -68,11 +85,11 @@ async function runViewer(room_id){
     Viewer.startViewers({accounts:_accounts, task_id: 1, room_id, tokens})
 
     await checkViewer(room_id);
-    if(is_live_end){
-        for(let index = 0 ; index < splice_accounts.length; index ++ ){
-            Viewer.stopViewers({ task_id: index+1 })
-        }
-    }
+    // if(is_live_end){
+    //     for(let index = 0 ; index < splice_accounts.length; index ++ ){
+    //         Viewer.stopViewers({ task_id: index+1 })
+    //     }
+    // }
     async function checkViewer(room_id){
         if(is_live_end){
             await helper.delay(5000)
@@ -87,9 +104,10 @@ async function runViewer(room_id){
         
         // console.log(helper.getTime(),"Info -- ",log);
         if(is_live_end){
-            for(let index = 0 ; index < splice_accounts.length; index ++ ){
-                Viewer.stopViewers({ task_id: index+1 })
-            }
+            // for(let index = 0 ; index < splice_accounts.length; index ++ ){
+            //     Viewer.stopViewers({ task_id: index+1 })
+            // }
+            room_id = await changeToEndRoom(room_id)
         }
         await helper.delay(5000)
         await checkViewer(room_id);
@@ -107,6 +125,7 @@ function getProxy(number=1){
 // runScript(["7501599845222697736","1","0","5"])
 async function main(){
   await helper.delay(30000)
+  restartBrowser(3*60);
     helper.clearCacheForFile(__dirname+"/data_room_mul.js")
     let {room_id, time} = require(__dirname+"/data_room_mul.js")
     time_check = time
@@ -128,11 +147,32 @@ async function main(){
         await helper.delay(61000)
     }
 }
+async function changeToEndRoom(room_id) {
+    let room_id_of_end = "7492838577072540436"
+    // let room_id = null;
+    try{
+        let data_room = require(__dirname+"/data_room_mul.js")
+        if(data_room.room_id.includes(',')){
+            return room_id
+        }
+        if(data_room.room_id){
+            room_id = data_room.room_id
+        }
+    }catch(e){
+        return room_id
+    }
+    if(room_id_of_end == room_id){
+        return room_id
+    }
+    room_id = room_id_of_end
+    await helper.writeFile({path:__dirname+"/data_room_mul.js", data: `module.exports={"time":"${Date.now()}","room_id":"${room_id}","is_off": true}`})
+    return room_id
+}
 async function checkFile(){
     try{
         if(time_check){
             helper.clearCacheForFile(__dirname+"/data_room_mul.js")
-            let {time, room_id} = require(__dirname+"/data_room_mul.js")
+            let {time, room_id, is_off} = require(__dirname+"/data_room_mul.js")
             if(time != time_check){
                 time_check = time
                 if(room_id.includes(',')){
@@ -142,9 +182,13 @@ async function checkFile(){
                     process.exit(1)
                 }else{
                     console.log("Thay đổi room data_room_mul.js")
-                    let proxies = await helper.getProxySite(120)
+                    let proxies = []
+                    while(proxies.length == 0){
+                        proxies = await helper.getProxySite(120)
+                        await helper.delay(1000)
+                    }
                     proxies = helper.shuffle(proxies)
-                    Viewer.changeRoom({ task_id: 1, room_id: room_id, proxy_list: proxies })
+                    Viewer.changeRoom({ task_id: 1, room_id: room_id, proxy_list: proxies, is_off })
                 }
             }
         }

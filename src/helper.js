@@ -577,7 +577,7 @@ const helper = {
     return text_to_get
   },
   getRoomId: async function ({name, proxy, retryCount }) {
-    if (!name.includes("https://")) {
+    if (name && !name.includes("https://")) {
       name = `https://www.tiktok.com/@${name}/live`
     };
     // console.log('name',name)
