@@ -105,7 +105,7 @@ const main = async ( )=>{
                                     for (var i = 0; i < tasks.length; i++) {
                                         cronRun[tasks[i]._id] = {}
                                         let accounts = tasks[i].cookie_strings.split(',')
-                                        console.log("accounts",accounts.length)
+                                        console.log("accounts",accounts.length,proxies.length)
                                         let acc_socket = []
                                         accounts.map(account => {
                                             let proxy = proxies[Math.floor(Math.random()*proxies.length)];
@@ -115,8 +115,8 @@ const main = async ( )=>{
                                             }
                                         });
                                         let room_id = tasks[i].room_id || tasks[i].video_id
-                                        // console.log("start", acc_socket)
-                                        Viewer.startViewers({accounts:acc_socket, task_id: tasks[i]._id, room_id, rabbitService, server_site})
+                                        console.log("start", acc_socket)
+                                        // Viewer.startViewers({accounts:acc_socket, task_id: tasks[i]._id, room_id, rabbitService, server_site})
                                     }
                                     
                                 }else{
