@@ -206,6 +206,11 @@ class Clone {
             })
             }
             // process.exit(1)
+        if(target_url && !target_url.includes('X-Bogus')){
+          let result = { is_403: false, data: "",body: "", error: "X-Bogus not found"}
+          this.status = "inactive"
+          return result
+        }
         var options = {
         proxy:  parserProxyString(this.proxy),
         'method': 'POST',

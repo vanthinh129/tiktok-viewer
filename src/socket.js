@@ -181,6 +181,9 @@ class TikTokSocket {
         if(that.room_id != that.room_id_off){
             let res1 = await this.clone.callApi({type: "enter"})
         }
+        if(that.clone.status == "inactive"){
+            return false
+        }
         // await helper.delay(10000000)
         // console.log("ENTER")
         this.enter = true
