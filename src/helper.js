@@ -1078,11 +1078,12 @@ const helper = {
       });
     });
   },
-  checkCookieLive: async function({username,cookie_string, proxy, proxy_list}) {
+  checkCookieLive: async function({cookie_string, proxy, proxy_list}) {
+    let verifyFp = helper.getString(cookie_string.replace(/ /g,'') + ';', 'verifyFp=', ';') || helper.getString(cookie_string.replace(/ /g,'') + ';', 's_v_web_id=', ';')
     const options = {
       retryTime: 3,
 
-      url: `https://www.tiktok.com/passport/web/account/info/?WebIdLastTime=1742631163&aid=1459&app_language=en&app_name=tiktok_web&browser_language=en-US&browser_name=Mozilla&browser_online=true&browser_platform=MacIntel&browser_version=5.0%20%28Macintosh%3B%20Intel%20Mac%20OS%20X%2010_15_7%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F134.0.0.0%20Safari%2F537.36&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=&device_platform=web_pc&focus_state=true&from_page=user&history_len=5&is_fullscreen=false&is_page_visible=true&odinId=&os=mac&priority_region=VN&referer=https%3A%2F%2Fwww.tiktok.com%2Flive&region=VN&root_referer=https%3A%2F%2Fwww.tiktok.com%2Flive&screen_height=1117&screen_width=1728&tz_name=Asia%2FSaigon&user_is_login=true&verifyFp=verify_lzzndjml_geR45jSd_PKon_4Ykv_Bc0M_n040N3GAU9Nc&webcast_language=en`,
+      url: `https://www.tiktok.com/passport/web/account/info/?WebIdLastTime=1742631163&aid=1459&app_language=en&app_name=tiktok_web&browser_language=en-US&browser_name=Mozilla&browser_online=true&browser_platform=MacIntel&browser_version=5.0%20%28Macintosh%3B%20Intel%20Mac%20OS%20X%2010_15_7%29%20AppleWebKit%2F537.36%20%28KHTML%2C%20like%20Gecko%29%20Chrome%2F134.0.0.0%20Safari%2F537.36&channel=tiktok_web&cookie_enabled=true&data_collection_enabled=true&device_id=&device_platform=web_pc&focus_state=true&from_page=user&history_len=5&is_fullscreen=false&is_page_visible=true&odinId=&os=mac&priority_region=VN&referer=https%3A%2F%2Fwww.tiktok.com%2Flive&region=VN&root_referer=https%3A%2F%2Fwww.tiktok.com%2Flive&screen_height=1117&screen_width=1728&tz_name=Asia%2FSaigon&user_is_login=true&verifyFp=${verifyFp}&webcast_language=en`,
       method: 'GET',
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
@@ -1090,7 +1091,7 @@ const helper = {
       },
         proxy,
         preCheckRetry: (body, json)=>{
-            return !body.includes(username);
+            return !body.includes('"user_id"');
 
         },
         proxy_list: proxy_list
@@ -1099,7 +1100,7 @@ const helper = {
     let { body, bodyJson, status, headers, error} = res;
     if(!body) {
       return {status:false}
-    }else if(body.includes(username)) {
+    }else if(body.includes('"user_id"')) {
       return {status:true, live:true,body}
     }else if(body.includes("session_expired")) {
       // console.log(username,body, proxy, cookie_string)
@@ -1218,8 +1219,8 @@ getLocationProxy: async function (proxy) {
     return "null"
   }
 },
-getProxySite: async function (proxy) {
-  let url = 'http://217.15.163.20:8549/api/cron/getliveproxies?authensone=mysonetrend&time=120'
+getProxySite: async function (time=120) {
+  let url = `http://217.15.163.20:8549/api/cron/getliveproxies?authensone=mysonetrend&time=${time}`
   let res = await helper.makeRequest({url})
   if(res.bodyJson && res.bodyJson.proxies && res.bodyJson.proxies.length > 0) {
     let proxies = res.bodyJson.proxies;
@@ -2134,13 +2135,23 @@ getRoomInfo2 :async function ({room_id, name, proxy, cookie_string, retryCount})
     }
     var proxy_array = proxy_string.replace('http://', '').replace('@', ':').split(':');
     if (proxy_array.length == 4) {
-        proxy_data = {
+        if(proxy_string.includes('@')){
+          proxy_data = {
             proxy: {
                 host: proxy_array[2],
                 port: parseInt(proxy_array[3]),
                 proxyAuth: `${proxy_array[0]}:${proxy_array[1]}`
             }
-        };
+          };
+        }else{
+          proxy_data = {
+            proxy: {
+                host: proxy_array[0],
+                port: parseInt(proxy_array[1]),
+                proxyAuth: `${proxy_array[2]}:${proxy_array[3]}`
+            }
+          };
+        }
     } else if (proxy_array.length == 2) {
         proxy_data = {
             proxy: {

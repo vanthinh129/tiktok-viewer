@@ -33,12 +33,12 @@ async function main(){
             let total_user = data.total_user
             username_join_on_list = username_join_on_list.sort()
             console.log(helper.getTime(),room_ids[i],':',total_user,data?.data_user?.length,count_join,(data_room[room_ids[i]])?true:false
-            ,username_join_on_list.join(",")
-        )
+            // ,username_join_on_list.join(",")
+            )
             // console.log(helper.getTime(),room_id,':',username_join_on_list.join(","),count_join)
             // await helper.delay(1000)
         }
-        await helper.delay(10000)
+        await helper.delay(30000)
         console.log("--------------------")
         return await main()
     }else{
@@ -72,6 +72,7 @@ async function getalluser(){
     folder_accs.push(`./data_test/acc_socket2.txt`)
     folder_accs.push(`./data_test/acc_socket3.txt`)
     folder_accs.push(`./data_test/acc_socket4.txt`)
+    folder_accs.push(`./data_test/acc_socket5.txt`)
 
     folder_accs.push(`./data_test/acc_socket_manual.txt`)
     folder_accs.push(`./data_test/acc_socket_edu.txt`)

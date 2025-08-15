@@ -244,7 +244,7 @@ const main = async () =>{
         console.log("max time")
         is_live_end = true
         process.exit(1)
-    }, 15*60*1000)
+    }, 20*60*1000)
     // await checkViewer(room_id);
     // clearTimeout(max_time)
     // await maingetroom()

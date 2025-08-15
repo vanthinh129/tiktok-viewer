@@ -1,0 +1,14 @@
+rabbitmq:
+browserservice: renew per 5 minutes
+task -> get task data
+    {
+        room_id: "....",
+        num_minutes: 12,
+        cookies: "cookie1,cookie2,....",
+    }
+Increase viewer:
+    + proxy site: random
+    + check live cookie
+        + if not data -> change proxy 
+        return check live cookie
+    + enter -> fetch -> socket: try again 5 times

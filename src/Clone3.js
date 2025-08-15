@@ -247,6 +247,7 @@ class Clone {
           console.log(data_page.error)
       }
         if(data_page.body) {
+          // helper.writeFile({path: path.resolve("./data_res1/"+this.username+".json"), data: data_page.body})
             let code = data_page.bodyJson.status_code;
             let message = (data_page.bodyJson|| {}).data.message;
             let result = { is_403: false, is_dead: message === "User doesn't login" || code === 20003 ? true: false, body: data_page.body}

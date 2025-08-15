@@ -24,7 +24,7 @@ const userAgentDefault =
 class TikTokSocket {
 
     constructor(data) {
-        let { cookie_string, proxy_string, useragent, isShowComment, onMessage, isShowLog, reconnect_after_time, task_id, server_site, wrss, clone, rabbitService } = data;
+        let { cookie_string, proxy_string, useragent, isShowComment, onMessage, isShowLog, reconnect_after_time, task_id, server_site, wrss, clone } = data;
         this.cookie_string = cookie_string || "";
         this.onMessage = onMessage;
         this.clone = clone
@@ -59,7 +59,7 @@ class TikTokSocket {
         this.time_connected = 0
         this.is_first_connected = true;
         this.server_site = server_site || "tt1"
-        this.rabbitService = rabbitService;
+        // this.rabbitService = await RabbitMQ.getInstance({url: "amqp://bupmat:bupmat@185.190.140.88:5672/"+this.server_site+"?heartbeat=60"});
 
     }
     async fetchs(){
@@ -140,9 +140,8 @@ class TikTokSocket {
                 // await that.clone.callApi({type: "leave"});
                 // await helper.delay(61000)
                 // console.log("enter switch room",that.clone.proxy, that.proxy_string)
-                
+                await that.clone.callApi({type: "enter"});
             }
-            await that.clone.callApi({type: "enter"});
             if(that.socketConnected && that.connection) {
                 let hb_first = that.sendHeartbeat(that.room_id)
                     that.connection.sendBytes(hb_first);
@@ -169,30 +168,27 @@ class TikTokSocket {
         that.start = Date.now();
         await this.clone.checkCookieLive()
         if(!this.clone.is_cookie_live){
-            console.log("logout", this.clone.username)
-            this.send403Rabbit([this.clone.username], "update_username_die")
-            fs.appendFileSync(path.resolve(__dirname,"../data_test/acc_logout.txt"),this.clone.username+"\n")
+            console.log("logout")
             this.retryTime = 0;
             this.retryTimeMax = 0;
             this.retryTimeFull = 0;
-            // console.log("Cookie die", )
+            console.log("Cookie die")
             return false
         }
         if(that.room_id != that.room_id_off){
             let res1 = await this.clone.callApi({type: "enter"})
         }
-        // await helper.delay(10000000)
         // console.log("ENTER")
         this.enter = true
         this.clone.setCursor  = true
-        let res = await this. clone.fetch()
+        // let res = await this. clone.fetch()
         this.lastFetch = Date.now();
-        this.wrss = this.clone.wrss
-
-        this.internal_ext = this.clone.internal_ext
-        this.cursor = this.clone.cursor
+        // this.wrss = this.clone.wrss
+        // this.internal_ext = this.clone.internal_ext
+        // this.cursor = this.clone.cursor
+        
         let result =  await new Promise(async(r) => {
-            // console.log("start socket", (new Date().toLocaleString()))
+            console.log("start socket", (new Date().toLocaleString()))
 
             await helper.delay(1000)
             if(that.cookie_string.includes("proxy_socket")){
@@ -217,7 +213,7 @@ class TikTokSocket {
                 const client = new WebSocketClient(options);
                 that.client = client
 
-                // console.log("that.proxy_string",that.proxy_string)
+                // console.log(that.client)
                 client.on('connectFailed', async function (error) {
                     error = error.message || error.toString()
                     if (error.includes("Server responded with a non-101 status: 200 OK")) {
@@ -273,11 +269,11 @@ class TikTokSocket {
                     connection.on('message', async function (message) {
                         if(!that.logged){
                             that.logged = true
-                            // console.log("Socket success", that.clone.username, (new Date().toLocaleString()))
+                            console.log("Socket success", that.clone.username, (new Date().toLocaleString()))
                         }
                     });
                     async function _sendPing2() {
-                        let randomNum = helper.getRandomInt(3000, 8000);
+                        let randomNum = 4000;
                         await helper.delay(randomNum)
                         if (that.socketConnected) {
                             connection.sendBytes(that.sendHeartbeat(that.room_id));
@@ -309,7 +305,7 @@ class TikTokSocket {
                     option.agent = tunnelingAgent
                 }
                 let url_string = that.createUrl({ room_id })
-                // console.log("url_string", url_string)
+                console.log("url_string", url_string)
                 client.connect(url_string, null, null, headers, option);
 
             } catch (e) {
@@ -347,7 +343,6 @@ class TikTokSocket {
         this.alive = false
         this.retryTime = this.retryTimeMax;
         this.closed = true;
-        this.rabbitService = null;
         if (this.socketConnected) {
             this.connection.close();
 
@@ -360,7 +355,6 @@ class TikTokSocket {
         this.alive = false
         this.retryTime = this.retryTimeMax;
         this.closed = true;
-        this.rabbitService = null;
         try{
             this.clone.callApi({type:"leave"})
             this.client.abort();
@@ -386,23 +380,18 @@ class TikTokSocket {
     }
     createUrl({ room_id }) {
         let browser_version = encodeURI(this.appversion)
-        let res = `wss://webcast16-ws-alisg.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?aid=1988&app_language=en&app_name=tiktok_web&browser_language=en-US&browser_name=Mozilla&browser_online=true&browser_platform=${this.browser_platform}&browser_version=${browser_version}&compress=gzip&cookie_enabled=true&cursor=${""}&debug=false&device_platform=web&heartbeatDuration=0&host=https%3A%2F%2Fwebcast.tiktok.com&identity=audience&imprp=&internal_ext=&live_id=12&room_id=` + room_id + `&screen_height=900&screen_width=1440&tz_name=Asia%2FSaigon&update_version_code=2.0.0&version_code=270000&webcast_sdk_version=2.0.0&wrss=` + (this.wrss ? this.wrss : helper.generateRandomString(43))
 
-        res =  `wss://webcast16-ws-alisg.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&browser_platform=${this.clone.browser_platform}&browser_name=Mozilla&browser_version=${browser_version}&browser_online=true&tz_name=Asia/Saigon&app_name=tiktok_web&sup_ws_ds_opt=1&version_code=270000&update_version_code=2.0.0&compress=gzip&wrss=${this.wrss ? this.wrss : helper.generateRandomString(43)}&host=https://webcast.tiktok.com&aid=1988&live_id=12&debug=false&app_language=vi-VN&client_enter=1&room_id=${room_id}&identity=audience&history_comment_count=6&heartbeat_duration=0&last_rtt=${this.clone.last_rtt}&internal_ext=${this.internal_ext}&cursor=${this.cursor}&resp_content_type=protobuf&did_rule=3&webcast_language=vi-VN`
+
+        //generate:
+        //wss://webcast16-ws-alisg.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&browser_platform=MacIntel&browser_name=Mozilla&browser_version=5.0%20(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/134.0.0.0%20Safari/537.36&browser_online=true&tz_name=Asia/Saigon&app_name=tiktok_web&sup_ws_ds_opt=1&version_code=270000&update_version_code=2.0.0&compress=gzip&wrss=ix5Luw_8gNwFtEnPavoWB_Cnc1PyYBdppiVGTT6ON8M&host=https://webcast.tiktok.com&aid=1988&live_id=12&debug=false&app_language=vi-VN&client_enter=1&room_id=7492838577072540436&identity=audience&history_comment_count=6&heartbeat_duration=0&last_rtt=301&internal_ext=fetch_time:1754879972322|start_time:0|ack_ids:,,|flag:0|seq:1|next_cursor:1754879972322_7537151160432459777_1_1_0_0|wss_info:0-1754879972322-0-0&cursor=1754879972322_7537151160432459777_1_1_0_0&resp_content_type=protobuf&did_rule=3&webcast_language=vi-VN
+        let now = Date.now()
+        let wrss = helper.generateRandomString(43)
+        let internal_ext = `fetch_time:${now}|start_time:0|ack_ids:,,|flag:0|seq:1|next_cursor:${now}_1_1_1_0_0|wss_info:0-${now}-0-0`
+        let cursor = `${now}_1_1_1_0_0`
+        let last_rtt = 0
+        let res =  `wss://webcast16-ws-alisg.tiktok.com/webcast/im/ws_proxy/ws_reuse_supplement/?version_code=180800&device_platform=web&cookie_enabled=true&screen_width=1512&screen_height=982&browser_language=vi&browser_platform=${this.clone.browser_platform}&browser_name=Mozilla&browser_version=${browser_version}&browser_online=true&tz_name=Asia/Saigon&app_name=tiktok_web&sup_ws_ds_opt=1&version_code=270000&update_version_code=2.0.0&compress=gzip&wrss=${wrss}&host=https://webcast.tiktok.com&aid=1988&live_id=12&debug=false&app_language=vi-VN&client_enter=1&room_id=${room_id}&identity=audience&history_comment_count=6&heartbeat_duration=0&last_rtt=${last_rtt}&internal_ext=${internal_ext}&cursor=${cursor}&resp_content_type=protobuf&did_rule=3&webcast_language=vi-VN`
         return res
     }
-    async send403Rabbit(accounts,action = "update_account_403"){
-        // "update_account_403"
-        try {
-            if(accounts.length){
-                let message = {"action": action, "accounts":accounts, time_now: Date.now()}
-                await this.rabbitService.sendMessage("rabbit_cron", message)
-            }
-        } catch(error){
-            // console.log("error handleSendRabbit", error)
-        }
-    
-    } 
     
 }
 module.exports = TikTokSocket
