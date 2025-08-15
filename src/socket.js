@@ -47,7 +47,7 @@ class TikTokSocket {
         this.browser_platform = helper.getString(this.useragent, "(", ")")
         this.retryTime = 5;
         this.retryTimeMax = 0;
-        this.retryTimeFull = 5;
+        this.retryTimeFull = 0;
         this.retryTimeMaxFull = 10000;
         this.socketConnected = false;
         this.connection = null;
@@ -336,7 +336,8 @@ class TikTokSocket {
                 console.log(that.sessionid, "Retry connect time", that.retryTime
                     // , that.proxy_string
                     )
-                return await this.connect({ room_id });
+                // return await this.connect({ room_id });
+                return false
             } else {
                 if(that.isShowLog)
                 console.log(that.sessionid, "Retry  max  time", that.retryTime)

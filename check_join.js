@@ -38,7 +38,7 @@ async function main(){
             // console.log(helper.getTime(),room_id,':',username_join_on_list.join(","),count_join)
             // await helper.delay(1000)
         }
-        await helper.delay(30000)
+        await helper.delay(3000)
         console.log("--------------------")
         return await main()
     }else{
