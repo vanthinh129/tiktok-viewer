@@ -105,6 +105,7 @@ const main = async ( )=>{
                                     for (var i = 0; i < tasks.length; i++) {
                                         cronRun[tasks[i]._id] = {}
                                         let accounts = tasks[i].cookie_strings.split(',')
+                                        console.log("accounts",accounts.length)
                                         let acc_socket = []
                                         accounts.map(account => {
                                             let proxy = proxies[Math.floor(Math.random()*proxies.length)];
@@ -261,6 +262,7 @@ async function getDataTask(number, task_id){
         timeout: 60000,
         retryTime: 2
     }
+    console.log(decodeURI(url))
     let result = await makeRequest(options)
     console.timeEnd('getDataTask'+task_id)
     try{
