@@ -115,8 +115,8 @@ const main = async ( )=>{
                                             }
                                         });
                                         let room_id = tasks[i].room_id || tasks[i].video_id
-                                        console.log("start", accounts,acc_socket)
-                                        // Viewer.startViewers({accounts:acc_socket, task_id: tasks[i]._id, room_id, rabbitService, server_site})
+                                        // console.log("start", accounts,acc_socket)
+                                        Viewer.startViewers({accounts:acc_socket, task_id: tasks[i]._id, room_id, rabbitService, server_site})
                                     }
                                     
                                 }else{
