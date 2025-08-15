@@ -90,7 +90,17 @@ const main = async ( )=>{
                             if(dataJson && dataJson.data){
                                 var tasks = dataJson.data;
                                 if(tasks.length > 0){
-                                    let proxies = await helper.getProxySite(180)
+                                    let proxies = [];
+                                    let time_get_proxy = 0;
+                                    while(proxies.length == 0){
+                                        proxies = await helper.getProxySite(180)
+                                        time_get_proxy++
+                                        if(time_get_proxy > 5){
+                                            break;
+                                        }else{
+                                            await delay(2000);
+                                        }
+                                    }
                                     proxies = helper.shuffle(proxies)
                                     for (var i = 0; i < tasks.length; i++) {
                                         cronRun[tasks[i]._id] = {}
