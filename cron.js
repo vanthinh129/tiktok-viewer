@@ -248,9 +248,10 @@ async function getDataTask(number, task_id){
     console.log('get task',task_id,'number',number)
     console.time('getDataTask'+task_id)
     let domain = {
-        "tt1": "http://localhost:9002",
+        // "tt1": "http://localhost:9002",
         // "tt2": "http://45.119.82.144:29002",
         // "tt2": "http://localhost:29001",
+        "tt1": "http://tt1cronlive.amazingcpanel.com",
         "tt2": "http://tt2cronlive.amazingcpanel.com",
     }
     let domain_select = domain[server_site.trim()];
