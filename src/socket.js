@@ -60,7 +60,7 @@ class TikTokSocket {
         this.is_first_connected = true;
         this.server_site = server_site || "tt1"
         this.rabbitService = rabbitService;
-
+        this.inter = null;
     }
     async fetchs(){
         await helper.delay(300)
@@ -267,6 +267,7 @@ class TikTokSocket {
                         that.clone.wrss = ""
                         that.clone.internal_ext = ""
                         that.clone.cursor = ""
+                        clearInterval(that.inter)
                         //     let proxies = helper.getProxySite(120)
                         //       proxies = helper.shuffle(proxies)
                         //       that.proxy_string = proxies[Math.floor(Math.random()*proxies.length)]
@@ -290,7 +291,12 @@ class TikTokSocket {
                     let hb_first = that.sendHeartbeat(that.room_id)
                     await helper.delay(1000)
                     connection.sendBytes(that.messageSwitchRooms(that.room_id));
-                    _sendPing2()
+                    // _sendPing2()
+                    that.inter = setInterval(() => {
+                        if (that.socketConnected) {
+                            connection.sendBytes(that.sendHeartbeat(that.room_id));
+                        }
+                    },10000)
                 });
                 const headers = {
                     'Cookie': that.cookie_string,

@@ -76,6 +76,7 @@ async function getalluser(){
 
     folder_accs.push(`./data_test/acc_socket_manual.txt`)
     folder_accs.push(`./data_test/acc_socket_edu.txt`)
+    folder_accs.push(`./data_test/acc_socket_temp.txt`)
     // folder_accs = [];
     // for (let i = 13; i <= 13; i++) {
     //     folder_accs.push(`./data_test/acc_test${i}.txt`)
